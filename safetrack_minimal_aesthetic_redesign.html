@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeTrack — Minimal Aesthetic Redesign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #F1F5F9;
+      color: #0F172A;
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* ======================================================== */
+    /* UNIFIED TYPOGRAPHY & SPACING SYSTEM (8px Grid Rhythm)    */
+    /* ======================================================== */
+
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    /* 1. Global Font Stack & Feature Settings */
+    *,
+    *::before,
+    *::after {
+      font-family: var(--font-sans);
+    }
+
+    html,
+    body {
+      font-family: var(--font-sans) !important;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01" !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      letter-spacing: 0;
+    }
+
+    /* Strict Monospace & Numeric Alignment for IDs, codes, timestamps, counters */
+    code,
+    kbd,
+    samp,
+    pre,
+    .font-mono,
+    [class*="font-mono"],
+    .font-monospace,
+    .tabular-nums,
+    [class*="tabular-nums"],
+    td.tabular-nums,
+    span.tabular-nums,
+    .docket-id,
+    .ticket-id,
+    .student-id,
+    .docket-id-cell,
+    time,
+    .badge-count,
+    .timestamp,
+    .kpi-value,
+    .header-bell-badge,
+    #badge-my-appointments-count,
+    #badge-notifications-student,
+    #badge-notifications-admin {
+      font-family: var(--font-mono) !important;
+      font-variant-numeric: tabular-nums !important;
+      white-space: nowrap !important;
+    }
+
+    /* 2. Consistent Type Scale */
+
+    /* Page Titles (H1): 24px-28px, weight 600, line-height: 1.2, letter-spacing: -0.025em */
+    h1,
+    .page-title,
+    .hero-title,
+    .student-hero-banner h1,
+    .admin-hero-banner h1,
+    #student-view-home > section:first-child h1,
+    #admin-view-home > section:first-child h1,
+    #admin-view-registry h1 {
+      font-family: var(--font-sans) !important;
+      font-size: 26px !important;
+      font-weight: 600 !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.025em !important;
+    }
+    @media (min-width: 640px) {
+      h1,
+      .page-title,
+      .hero-title,
+      .student-hero-banner h1,
+      .admin-hero-banner h1,
+      #student-view-home > section:first-child h1,
+      #admin-view-home > section:first-child h1,
+      #admin-view-registry h1 {
+        font-size: 28px !important;
+      }
+    }
+    @media (max-width: 639px) {
+      h1,
+      .page-title,
+      .hero-title,
+      .student-hero-banner h1,
+      .admin-hero-banner h1,
+      #student-view-home > section:first-child h1,
+      #admin-view-home > section:first-child h1,
+      #admin-view-registry h1 {
+        font-size: 24px !important;
+      }
+    }
+
+    /* Section / Card Headings (H2): 16px-18px, weight 600, line-height: 1.35, letter-spacing: -0.015em */
+    h2,
+    .section-title,
+    .card-title,
+    .student-hero-banner h2,
+    .admin-hero-banner h2,
+    #student-view-tickets h2,
+    #student-view-clearance h2,
+    #admin-view-registry h2,
+    #admin-view-clearance h2,
+    #admin-view-appointments h2 {
+      font-family: var(--font-sans) !important;
+      font-size: 17px !important;
+      font-weight: 600 !important;
+      line-height: 1.35 !important;
+      letter-spacing: -0.015em !important;
+    }
+    @media (min-width: 640px) {
+      h2,
+      .section-title,
+      .card-title {
+        font-size: 18px !important;
+      }
+    }
+    @media (max-width: 639px) {
+      h2,
+      .section-title,
+      .card-title {
+        font-size: 16px !important;
+      }
+    }
+
+    /* Subheadings / Labels (H3): 14px-15px, weight 600, line-height: 1.4 */
+    h3,
+    .subheading,
+    .item-title,
+    .card-subtitle,
+    #student-view-home .grid > div h3,
+    #student-view-clearance h3,
+    #student-view-appointments h3,
+    #admin-view-home h3,
+    #admin-view-registry h3,
+    #admin-view-clearance h3,
+    #admin-view-appointments h3,
+    #modal-policy h3,
+    #modal-case-details h3,
+    #modal-admin-docket h3,
+    #modal-quick-help h3,
+    #modal-audit-log h3 {
+      font-family: var(--font-sans) !important;
+      font-size: 14.5px !important;
+      font-weight: 600 !important;
+      line-height: 1.4 !important;
+      letter-spacing: -0.01em !important;
+    }
+
+    /* Body Copy & Table Text: 14px, weight 400, line-height: 1.5, letter-spacing: 0 */
+    p,
+    .body-text,
+    table tbody td,
+    .table tbody td,
+    input,
+    select,
+    textarea {
+      font-family: var(--font-sans) !important;
+      font-size: 14px !important;
+      font-weight: 400 !important;
+      line-height: 1.5 !important;
+      letter-spacing: 0 !important;
+    }
+
+    /* Micro Labels / Table Headers / Metadata: 11px-12px, weight 500-600, line-height: 1.4 */
+    table thead th,
+    .table thead th,
+    .micro-label,
+    .meta-label,
+    .table-header,
+    .kpi-label {
+      font-family: var(--font-sans) !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      line-height: 1.4 !important;
+      letter-spacing: 0.05em !important;
+    }
+
+    .meta-subtext,
+    .timestamp,
+    .helper-text,
+    .caption {
+      font-size: 12px !important;
+      font-weight: 500 !important;
+      line-height: 1.4 !important;
+    }
+
+    /* 3. Spacing & Breathing Room (8px Grid Rhythm) */
+
+    /* Page & Section Containers: px-4 py-4 sm:px-6 sm:py-6, space-y-4 mobile, space-y-6 desktop */
+    .dashboard-main-content {
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      padding: 16px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 16px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      overflow-x: hidden !important;
+    }
+    @media (min-width: 640px) {
+      .dashboard-main-content {
+        padding: 24px !important;
+        gap: 24px !important;
+      }
+    }
+
+    .major-section,
+    .dashboard-section,
+    .admin-overview-container,
+    #student-view-home,
+    #student-view-form,
+    #student-view-tickets,
+    #student-view-clearance,
+    #student-view-appointments,
+    #admin-view-home,
+    #admin-view-registry,
+    #admin-view-clearance,
+    #admin-view-appointments {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 16px !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    @media (min-width: 640px) {
+      .major-section,
+      .dashboard-section,
+      .admin-overview-container,
+      #student-view-home,
+      #student-view-form,
+      #student-view-tickets,
+      #student-view-clearance,
+      #student-view-appointments,
+      #admin-view-home,
+      #admin-view-registry,
+      #admin-view-clearance,
+      #admin-view-appointments {
+        gap: 24px !important;
+      }
+    }
+
+    /* Remove accidental dead whitespace gaps */
+    .major-section > * + *,
+    .dashboard-main-content > * + *,
+    #student-view-appointments > * + * {
+      margin-top: 0 !important;
+    }
+
+    /* Cards & Panels: Standardize internal padding (p-4 sm:p-5 or p-6) and grid gaps (gap-4 mobile, gap-5 or gap-6 desktop) */
+    .card,
+    .dashboard-card,
+    .content-card-minimal,
+    #student-view-home .grid > div,
+    #student-view-form > div,
+    #student-view-tickets > div,
+    #student-view-clearance > div,
+    #student-view-appointments .consult-step-card,
+    #admin-view-home .grid > div,
+    #admin-view-registry > div,
+    #admin-view-clearance > div,
+    #admin-view-appointments .grid > div {
+      padding: 16px !important;
+      border-radius: 16px !important;
+      box-sizing: border-box !important;
+    }
+    @media (min-width: 640px) {
+      .card,
+      .dashboard-card,
+      .content-card-minimal,
+      #student-view-home .grid > div,
+      #student-view-form > div,
+      #student-view-tickets > div,
+      #student-view-clearance > div,
+      #student-view-appointments .consult-step-card,
+      #admin-view-home .grid > div,
+      #admin-view-registry > div,
+      #admin-view-clearance > div,
+      #admin-view-appointments .grid > div {
+        padding: 24px !important;
+      }
+    }
+
+    /* KPI Deck Cards */
+    #admin-home-kpi-deck > div,
+    #admin-registry-kpi-deck > div {
+      padding: 16px !important;
+      border-radius: 16px !important;
+      box-sizing: border-box !important;
+    }
+    @media (min-width: 640px) {
+      #admin-home-kpi-deck > div,
+      #admin-registry-kpi-deck > div {
+        padding: 20px !important;
+      }
+    }
+
+    /* Grid Gaps: gap-4 (16px) on mobile, gap-5 (20px) / gap-6 (24px) on desktop */
+    #admin-home-kpi-deck,
+    #admin-registry-kpi-deck,
+    .kpi-deck,
+    .admin-quick-actions-grid,
+    #student-view-home .grid,
+    #admin-view-home .grid,
+    #admin-view-appointments .grid {
+      gap: 16px !important;
+    }
+    @media (min-width: 640px) {
+      #admin-home-kpi-deck,
+      #admin-registry-kpi-deck,
+      .kpi-deck,
+      .admin-quick-actions-grid,
+      #student-view-home .grid,
+      #admin-view-home .grid,
+      #admin-view-appointments .grid {
+        gap: 20px !important;
+      }
+    }
+    @media (min-width: 1024px) {
+      #admin-home-kpi-deck,
+      #admin-registry-kpi-deck,
+      .kpi-deck,
+      .admin-quick-actions-grid,
+      #student-view-home .grid,
+      #admin-view-home .grid,
+      #admin-view-appointments .grid {
+        gap: 24px !important;
+      }
+    }
+
+    /* Headers, Navbars & Badges: Consistent flex alignment and shrink-0 */
+    .badge,
+    .status-pill,
+    [class*="status-pill-"],
+    .network-pwa-badge,
+    .role-toggle-pill,
+    .header-btn-quick-help,
+    .header-btn-audit,
+    .header-id-pill {
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+    }
+    .badge svg,
+    .status-pill svg,
+    [class*="status-pill-"] svg,
+    .network-pwa-badge svg,
+    .role-toggle-pill svg,
+    .header-btn-quick-help svg,
+    .header-btn-audit svg {
+      flex-shrink: 0 !important;
+    }
+
+    /* Forms, Buttons & Inputs */
+    form label,
+    .form-group label,
+    label {
+      display: block !important;
+      margin-bottom: 6px !important; /* mb-1.5: 6px */
+      font-size: 13px !important;
+      font-weight: 500 !important;
+      line-height: 1.4 !important;
+    }
+
+    form .space-y-4 > * + *,
+    .form-section-group,
+    .form-group + .form-group {
+      margin-top: 16px !important; /* space-y-4: 16px */
+    }
+
+    /* Balanced internal padding (px-3.5 py-2.5) & consistent height (h-10) */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="datetime-local"],
+    input[type="date"],
+    select,
+    .form-input,
+    .form-select {
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 10px 14px !important; /* py-2.5 px-3.5 */
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      border-radius: 12px !important;
+      box-sizing: border-box !important;
+    }
+    @media (max-width: 639px) {
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="search"],
+      input[type="datetime-local"],
+      input[type="date"],
+      select,
+      .form-input,
+      .form-select {
+        height: 42px !important;
+        min-height: 42px !important;
+        font-size: 16px !important;
+      }
+    }
+
+    textarea,
+    .form-textarea {
+      padding: 10px 14px !important; /* py-2.5 px-3.5 */
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      border-radius: 12px !important;
+      box-sizing: border-box !important;
+    }
+    @media (max-width: 639px) {
+      textarea,
+      .form-textarea {
+        font-size: 16px !important;
+      }
+    }
+
+    button.btn-primary,
+    button[type="submit"],
+    .btn-action,
+    .btn-secondary,
+    #btn-open-admin-docket,
+    #btn-verify-clearance,
+    #btn-reset-filter,
+    #btn-clear-student-form {
+      height: 40px !important;
+      min-height: 40px !important;
+      padding: 10px 16px !important; /* px-4 py-2.5 */
+      font-size: 14px !important;
+      font-weight: 500 !important;
+      line-height: 1.4 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 8px !important;
+      border-radius: 12px !important;
+      box-sizing: border-box !important;
+    }
+    @media (max-width: 639px) {
+      button.btn-primary,
+      button[type="submit"],
+      .btn-action,
+      .btn-secondary,
+      #btn-open-admin-docket,
+      #btn-verify-clearance,
+      #btn-reset-filter,
+      #btn-clear-student-form {
+        height: 42px !important;
+        min-height: 42px !important;
+      }
+    }
+
+    /* Tables & Lists */
+    /* Breathable padding for table cells: px-4 py-3.5 */
+    table thead th,
+    .table thead th {
+      padding: 10px 16px !important; /* px-4 py-2.5 */
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      line-height: 1.4 !important;
+      letter-spacing: 0.05em !important;
+      text-transform: uppercase !important;
+      white-space: nowrap !important;
+    }
+
+    table tbody td,
+    .table tbody td {
+      padding: 14px 16px !important; /* px-4 py-3.5 */
+      font-size: 14px !important;
+      font-weight: 400 !important;
+      line-height: 1.5 !important;
+      letter-spacing: 0 !important;
+      vertical-align: middle !important;
+    }
+
+    /* List items: consistent vertical padding py-3 px-4 */
+    .list-item,
+    .dossier-list-item,
+    .appointment-slot-item,
+    .ticket-list-row,
+    .osas-convo-row {
+      padding: 12px 16px !important; /* py-3 px-4 */
+    }
+
+  </style>
+</head>
+<body class="bg-[#F1F5F9] text-[#0F172A] antialiased min-h-screen flex flex-col">
+
+  <!-- Minimal Slide-Over Sidebar (#2563EB) -->
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 bg-[#0F172A]/30 backdrop-blur-[2px] hidden"></div>
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#2563EB] text-white flex flex-col transform -translate-x-full transition-transform duration-200 ease-out shadow-xl">
+    <div class="h-16 px-5 flex items-center justify-between border-b border-white/10">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center">
+          <svg class="w-4 h-4 text-[#06B6D4]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="text-sm font-bold tracking-tight leading-none">SafeTrack</div>
+          <div id="role-badge-sidebar" class="text-[10px] font-semibold tracking-wider uppercase text-[#06B6D4] mt-1">Student Space</div>
+        </div>
+      </div>
+      <button id="close-sidebar-btn" class="p-1.5 rounded-lg text-white/75 hover:text-white hover:bg-white/10" aria-label="Close menu">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <nav id="sidebar-nav" class="flex-1 px-3 py-4 space-y-1 overflow-y-auto"></nav>
+
+    <div class="p-3.5 border-t border-white/10 bg-[#1D4ED8]/40 space-y-2">
+      <div class="text-[10px] font-semibold uppercase tracking-wider text-white/70 px-1">Portal View</div>
+      <div class="grid grid-cols-2 gap-1 bg-black/15 p-1 rounded-xl">
+        <button id="switch-student-btn" class="px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors">Student</button>
+        <button id="switch-prefect-btn" class="px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors">Prefect</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Minimal Top Navbar (Original Layout) -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <button id="back-to-home-btn" class="hidden p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors" title="Back">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <button id="open-sidebar-btn" class="p-2 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors" aria-label="Open menu">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-[#2563EB]/10 flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-[#2563EB]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <span class="text-sm sm:text-base font-bold text-[#0F172A] tracking-tight">SafeTrack</span>
+          <span id="header-role-pill" class="hidden sm:inline-flex px-2 py-0.5 rounded-md bg-[#F1F5F9] text-[10px] font-semibold tracking-wider uppercase text-[#64748B]">STUDENT SPACE</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="topbar-utility-btn" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors">
+          <span id="topbar-utility-label">Quick Help</span>
+        </button>
+
+        <div class="relative">
+          <button id="notif-btn" class="relative w-8 h-8 rounded-full border border-slate-200/80 bg-white text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors" aria-label="Notifications">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span id="notif-count" class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2563EB] text-white text-[9px] font-bold flex items-center justify-center">2</span>
+          </button>
+          <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-slate-200/80 shadow-lg p-3 z-50">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+              <span class="text-xs font-semibold text-[#0F172A]">Notifications</span>
+              <button id="clear-notifs-btn" class="text-[11px] font-medium text-[#2563EB] hover:text-[#1D4ED8]">Mark read</button>
+            </div>
+            <div id="notif-list" class="space-y-2 text-xs"></div>
+          </div>
+        </div>
+
+        <div class="hidden md:inline-flex items-center px-3 py-1.5 rounded-full border border-slate-200/80 bg-[#F1F5F9]/60 text-xs text-[#64748B]">
+          ID: <span id="topbar-id-val" class="ml-1 font-semibold text-[#0F172A]">2023-01842-CM-0</span>
+        </div>
+
+        <span class="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50/80 text-emerald-700 text-xs font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          Online (PWA Ready)
+        </span>
+
+        <button id="role-toggle-pill" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200/80 bg-white hover:bg-[#F1F5F9] text-xs font-medium text-[#0F172A] transition-colors">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#06B6D4]"></span>
+          <span id="role-toggle-label">Prefect View</span>
+        </button>
+
+        <button id="logout-btn" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-rose-200/80 bg-rose-50/70 hover:bg-rose-100 text-rose-600 text-xs font-medium transition-colors">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span class="hidden sm:inline">Logout</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Centered Horizontal Pill-Tab Navigation (Original Layout, Minimal Polish) -->
+  <div class="pt-6 pb-2 px-4">
+    <div class="max-w-5xl mx-auto">
+      <nav id="pill-tabs" class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-4 border-b border-slate-200/70"></nav>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main id="main-content" class="flex-1 px-4 sm:px-6 pt-5 pb-14 max-w-5xl w-full mx-auto"></main>
+
+  <!-- Modal -->
+  <div id="modal-overlay" class="fixed inset-0 z-50 bg-[#0F172A]/40 backdrop-blur-[2px] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xl max-w-lg w-full overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h3 id="modal-title" class="text-sm font-semibold text-[#0F172A]">Details</h3>
+        <button id="modal-close-btn" class="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9]">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="modal-body" class="p-5 text-sm text-[#0F172A] max-h-[75vh] overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const state = {
+        role: 'student',
+        view: 'home',
+        notifRead: false,
+        bookingMode: 'scheduled',
+        bookingOffice: 'OSAS Prefect Office',
+        bookingSlot: '08:30 AM - 09:15 AM',
+        chatFilter: 'All',
+        chatSearch: '',
+        activeChatId: 'CDM-2024-002',
+        showDossier: true,
+        registrySearch: '',
+        registryInstitute: 'All',
+        registryStatus: 'All',
+        revealedDockets: {},
+        clearanceQuery: '',
+        clearanceResult: null,
+        walkInServing: 2,
+        walkInWaiting: 3,
+        incidentIdentityMode: 'anonymous',
+
+        cases: [
+          {
+            docket: 'CDM-2024-007',
+            student: 'Anonymous Montalbano #3784',
+            realName: 'Carlos Miguel Navarro (2023-04112-CM-0)',
+            protectedIdentity: true,
+            institute: 'IE',
+            classification: 'Campus Disruption',
+            date: '2026-11-17 05:07',
+            location: 'Engineering Hall 2F',
+            referral: 'Guidance',
+            status: 'Pending Hearing',
+            notes: '[CONFIDENTIAL REPORT] Identity securely verified and confirmed by OSA. Masked from public viewing.',
+            mine: true
+          },
+          {
+            docket: 'CDM-2024-002',
+            student: 'Anonymous Montalbano #4812',
+            realName: 'Samantha Nicole Cruz (2023-08124-CM-0)',
+            protectedIdentity: true,
+            institute: 'IBA',
+            classification: 'Bullying / Harassment',
+            date: '2024-10-02',
+            location: 'Business Hall Quadrangle',
+            referral: 'Guidance',
+            status: 'Pending Hearing',
+            notes: '[CONFIDENTIAL REPORT] Identity securely verified and confirmed by OSA: Samantha Nicole Cruz (2023-08124-CM-0). Masked from public viewing.',
+            mine: true
+          },
+          {
+            docket: 'CDM-2024-001',
+            student: 'Christian Reyes',
+            realName: 'Christian Reyes (2022-01492-CM-0)',
+            protectedIdentity: false,
+            institute: 'ICS',
+            classification: 'Academic Dishonesty / Plagiarism',
+            date: '2024-09-14',
+            location: 'ICS Computer Lab 3',
+            referral: 'Guidance',
+            status: 'Resolved',
+            notes: 'Restorative academic integrity workshop completed.',
+            mine: false
+          },
+          {
+            docket: 'CDM-2024-003',
+            student: 'Mark Joseph Villanueva',
+            realName: 'Mark Joseph Villanueva (2021-00213-CM-0)',
+            protectedIdentity: false,
+            institute: 'IE',
+            classification: 'Vandalism / Property Damage',
+            date: '2024-10-18',
+            location: 'Engineering Workshop Building B',
+            referral: 'Standard',
+            status: 'Under Investigation',
+            notes: 'Awaiting facilities assessment report.',
+            mine: false
+          },
+          {
+            docket: 'CDM-2024-004',
+            student: 'Alyssa Marie Flores',
+            realName: 'Alyssa Marie Flores (2024-03912-CM-0)',
+            protectedIdentity: false,
+            institute: 'IEd',
+            classification: 'Uniform & Grooming Violation',
+            date: '2024-10-25',
+            location: 'Main Campus Entrance Gate',
+            referral: 'Standard',
+            status: 'Resolved',
+            notes: 'Warning issued and acknowledged.',
+            mine: false
+          },
+          {
+            docket: 'CDM-2024-005',
+            student: 'Joshua David Aquino',
+            realName: 'Joshua David Aquino (2023-09431-CM-0)',
+            protectedIdentity: false,
+            institute: 'ICS',
+            classification: 'Campus Disruption',
+            date: '2024-11-01',
+            location: 'Audio Visual Room 2',
+            referral: 'Guidance',
+            status: 'Under Investigation',
+            notes: 'Preliminary witness statements logged.',
+            mine: false
+          },
+          {
+            docket: 'CDM-2024-006',
+            student: 'Patricia Mae Santos',
+            realName: 'Patricia Mae Santos (2022-04518-CM-0)',
+            protectedIdentity: false,
+            institute: 'IEd',
+            classification: 'Substance Policy Violation',
+            date: '2024-11-03',
+            location: 'Education Wing Restroom Area',
+            referral: 'Guidance',
+            status: 'Pending Hearing',
+            notes: 'Scheduled for formal Board conciliation.',
+            mine: false
+          }
+        ],
+
+        bookings: [
+          { id: 'BK-104', office: 'OSAS Prefect Office', nature: 'Disciplinary Case Inquiry', date: '2026-11-18', time: '02:00 PM', status: 'Confirmed' },
+          { id: 'BK-103', office: 'CGCC Guidance & Counseling', nature: 'Restorative Counseling', date: '2026-11-15', time: '10:30 AM', status: 'Completed' },
+          { id: 'WK-018', office: 'OSAS Prefect Office', nature: 'Walk-In Queue Pass', date: '2026-11-12', time: '09:15 AM', status: 'Completed' }
+        ],
+
+        chats: [
+          {
+            id: 'CDM-2024-007',
+            title: 'Campus Disruption Consultation',
+            preview: 'Office: Hello Montalbano. Your confident...',
+            time: 'Just now',
+            status: 'Active',
+            officer: 'Officer ErNiel',
+            messages: [
+              { from: 'officer', text: 'Hello Montalbano. Your confidential report #CDM-2024-007 has been received by the Prefect Desk.', time: '10:02 AM' }
+            ]
+          },
+          {
+            id: 'CDM-2024-002',
+            title: 'Bullying / Harassment Inquiry',
+            preview: 'Officer: Thank you. Evidence item has b...',
+            time: '9:20 AM',
+            status: 'Awaiting',
+            officer: 'Officer ErNiel',
+            messages: [
+              { from: 'student', text: 'Here is the screenshot of the group chat messages from the quadrangle incident as requested for evidentiary validation.', time: '3:15 PM', attachment: 'Harassment_Evidence_Screenshot.png' },
+              { from: 'officer', text: 'Thank you. Evidence item has been logged into Docket #CDM-2024-002. Please confirm if you are able to attend the conciliation conference tomorrow at 2:00 PM in CGCC Room 201.', time: '9:20 AM' }
+            ]
+          },
+          {
+            id: 'CDM-2024-001',
+            title: 'Academic Dishonesty Review',
+            preview: 'Office: Case Docket #CDM-2024-001 is ...',
+            time: 'Sep 28',
+            status: 'Resolved',
+            officer: 'Prefect Desk',
+            messages: [
+              { from: 'officer', text: 'Case Docket #CDM-2024-001 is now marked Resolved. Your clearance record has been updated.', time: 'Sep 28' }
+            ]
+          },
+          {
+            id: 'CDM-2024-003',
+            title: 'Workshop Property Damage Inqu...',
+            preview: 'OSAS: OFFICIAL OSAS FOLLOW-UP ...',
+            time: '8:45 AM',
+            status: 'Follow-Up',
+            officer: 'OSAS Officer',
+            messages: [
+              { from: 'officer', text: 'OFFICIAL OSAS FOLLOW-UP: Please submit the signed workshop equipment checklist before Friday.', time: '8:45 AM' }
+            ]
+          },
+          {
+            id: 'CDM-2024-005',
+            title: 'Audio Visual Room Disruption In...',
+            preview: 'You: Received, Officer. I will arrive 15 mi...',
+            time: '11:00 AM',
+            status: 'Active',
+            officer: 'Officer ErNiel',
+            messages: [
+              { from: 'officer', text: 'Please proceed to Admin Wing Rm 102 for your scheduled statement verification.', time: '10:55 AM' },
+              { from: 'student', text: 'Received, Officer. I will arrive 15 minutes early.', time: '11:00 AM' }
+            ]
+          }
+        ],
+
+        testRecords: {
+          '2023-08124-CM-0': { name: 'Samantha Nicole Cruz', standing: 'Pending Hearing', cleared: false, docket: 'CDM-2024-002', note: 'Active conciliation conference scheduled in CGCC Room 201.' },
+          '2021-00213-CM-0': { name: 'Mark Joseph Villanueva', standing: 'Under Investigation', cleared: false, docket: 'CDM-2024-003', note: 'Pending Engineering Workshop property assessment.' },
+          '2022-01492-CM-0': { name: 'Christian Reyes', standing: 'Resolved', cleared: true, docket: 'CDM-2024-001', note: 'All corrective directives completed. Eligible for Good Moral Certificate.' },
+          '2024-00999-CM-0': { name: 'Elena Beatriz Ramos', standing: 'Exemplary', cleared: true, docket: 'None', note: 'No active grievances, unresolved dockets, or behavioral sanctions.' }
+        }
+      };
+
+      const studentNav = [
+        { id: 'home', label: 'Home', icon: 'home' },
+        { id: 'submit', label: 'Submit Incident', icon: 'edit' },
+        { id: 'tickets', label: 'My Submitted Tickets', icon: 'file' },
+        { id: 'clearance', label: 'Clearance Status', icon: 'check' },
+        { id: 'consultation', label: 'Book Consultation', icon: 'calendar' },
+        { id: 'chat', label: 'OSAS Chat', icon: 'chat' }
+      ];
+
+      const prefectNav = [
+        { id: 'overview', label: 'Institutional Overview', icon: 'home' },
+        { id: 'registry', label: 'Disciplinary Case Registry', icon: 'folder' },
+        { id: 'verify', label: 'Clearance & Good Moral Verification', icon: 'check' },
+        { id: 'queue', label: 'Appointments & Queue', icon: 'calendar' },
+        { id: 'chat', label: 'OSAS Chat', icon: 'chat' }
+      ];
+
+      function getIcon(name, cls = 'w-4 h-4') {
+        const icons = {
+          home: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+          edit: '<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>',
+          file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+          check: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+          calendar: '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+          chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+          folder: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+          shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+          clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+          search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+          lock: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+          arrow: '<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>'
+        };
+        return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icons[name] || ''}</svg>`;
+      }
+
+      function showToast(message, tone = 'info') {
+        const container = document.getElementById('toast-container');
+        const el = document.createElement('div');
+        const border = tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-slate-200 bg-white text-[#0F172A]';
+        el.className = `px-4 py-3 rounded-xl border shadow-md text-xs font-medium flex items-center gap-2.5 ${border}`;
+        el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${tone === 'success' ? 'bg-emerald-500' : 'bg-[#06B6D4]'} shrink-0"></span><span>${message}</span>`;
+        container.appendChild(el);
+        setTimeout(() => { el.remove(); }, 3000);
+      }
+
+      function openModal(title, html) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-body').innerHTML = html;
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      }
+
+      function closeModal() {
+        const overlay = document.getElementById('modal-overlay');
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+      }
+
+      function statusBadge(status) {
+        const map = {
+          'Pending Hearing': 'bg-slate-50 text-[#0F172A] border-slate-200',
+          'Under Investigation': 'bg-cyan-50/70 text-cyan-800 border-cyan-200/80',
+          'Resolved': 'bg-emerald-50/80 text-emerald-700 border-emerald-200/80',
+          'Awaiting': 'bg-blue-50/80 text-[#2563EB] border-blue-200/80',
+          'Active': 'bg-emerald-50/80 text-emerald-700 border-emerald-200/80',
+          'Follow-Up': 'bg-amber-50/80 text-amber-700 border-amber-200/80',
+          'Confirmed': 'bg-blue-50/80 text-[#2563EB] border-blue-200/80',
+          'Completed': 'bg-slate-100 text-[#64748B] border-slate-200',
+          'Exemplary': 'bg-emerald-50/80 text-emerald-700 border-emerald-200/80'
+        };
+        const cls = map[status] || 'bg-slate-100 text-[#64748B] border-slate-200';
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border whitespace-nowrap ${cls}">${status}</span>`;
+      }
+
+      function toggleSidebar(open) {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.getElementById('sidebar-backdrop');
+        if (open) {
+          sidebar.classList.remove('-translate-x-full');
+          backdrop.classList.remove('hidden');
+        } else {
+          sidebar.classList.add('-translate-x-full');
+          backdrop.classList.add('hidden');
+        }
+      }
+
+      function renderChrome() {
+        const navItems = state.role === 'student' ? studentNav : prefectNav;
+        if (!navItems.some(n => n.id === state.view)) {
+          state.view = navItems[0].id;
+        }
+
+        document.getElementById('header-role-pill').textContent = state.role === 'student' ? 'STUDENT SPACE' : 'PREFECT DESK';
+        document.getElementById('topbar-id-val').textContent = state.role === 'student' ? '2023-01842-CM-0' : 'prefect@cdm.edu.ph';
+        document.getElementById('role-toggle-label').textContent = state.role === 'student' ? 'Prefect View' : 'Student View';
+        document.getElementById('back-to-home-btn').classList.toggle('hidden', state.role === 'student');
+
+        const utilBtn = document.getElementById('topbar-utility-btn');
+        const utilLabel = document.getElementById('topbar-utility-label');
+        if (state.role === 'student') {
+          utilBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-rose-200/80 bg-rose-50/70 text-rose-600 hover:bg-rose-100 transition-colors';
+          utilLabel.textContent = 'Quick Help';
+        } else {
+          utilBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-slate-200/80 bg-white text-[#0F172A] hover:bg-[#F1F5F9] transition-colors';
+          utilLabel.textContent = 'Audit Log';
+        }
+
+        const pillTabs = document.getElementById('pill-tabs');
+        pillTabs.innerHTML = navItems.map(item => {
+          const active = item.id === state.view;
+          return `
+            <button data-nav="${item.id}" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-[13px] font-medium whitespace-nowrap transition-all ${
+              active
+                ? 'bg-[#2563EB] text-white shadow-sm'
+                : 'bg-white text-[#64748B] border border-slate-200/70 hover:text-[#0F172A] hover:border-slate-300'
+            }">
+              <span class="${active ? 'text-[#06B6D4]' : 'text-[#64748B]'}">${getIcon(item.icon, 'w-3.5 h-3.5')}</span>
+              <span>${item.label}</span>
+            </button>
+          `;
+        }).join('');
+
+        document.getElementById('role-badge-sidebar').textContent = state.role === 'student' ? 'Student Space' : 'Prefect Desk';
+        const stuBtn = document.getElementById('switch-student-btn');
+        const preBtn = document.getElementById('switch-prefect-btn');
+        stuBtn.className = `px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors ${state.role === 'student' ? 'bg-white text-[#2563EB]' : 'text-white/80 hover:text-white'}`;
+        preBtn.className = `px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors ${state.role === 'prefect' ? 'bg-white text-[#2563EB]' : 'text-white/80 hover:text-white'}`;
+
+        const sidebarNav = document.getElementById('sidebar-nav');
+        sidebarNav.innerHTML = navItems.map(item => {
+          const active = item.id === state.view;
+          return `
+            <button data-nav="${item.id}" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+              active ? 'bg-white/15 text-white' : 'text-white/80 hover:text-white hover:bg-[#1D4ED8]'
+            }">
+              <span class="${active ? 'text-[#06B6D4]' : 'text-white/75'}">${getIcon(item.icon, 'w-4 h-4')}</span>
+              <span class="truncate">${item.label}</span>
+            </button>
+          `;
+        }).join('');
+
+        document.querySelectorAll('[data-nav]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            state.view = btn.dataset.nav;
+            toggleSidebar(false);
+            render();
+          });
+        });
+
+        const notifCount = document.getElementById('notif-count');
+        notifCount.textContent = state.role === 'student' ? '2' : '0';
+        notifCount.classList.toggle('hidden', state.notifRead || state.role === 'prefect');
+        document.getElementById('notif-list').innerHTML = state.role === 'student'
+          ? `
+            <div class="p-2.5 rounded-xl bg-[#F1F5F9]">
+              <div class="font-semibold text-[#0F172A]">Conciliation Conference</div>
+              <div class="text-[#64748B] mt-0.5">Docket #CDM-2024-002 tomorrow at 2:00 PM in CGCC Room 201.</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-[#F1F5F9]">
+              <div class="font-semibold text-[#0F172A]">Good Moral Clearance</div>
+              <div class="text-[#64748B] mt-0.5">Your student standing is Verified &amp; Cleared.</div>
+            </div>`
+          : `<div class="p-3 text-center text-[#64748B]">No new notifications.</div>`;
+      }
+
+      // --- STUDENT VIEWS (Original Layout, Minimal & Aesthetic) ---
+      function renderStudentHome() {
+        return `
+          <div class="space-y-6">
+            <section class="rounded-2xl bg-[#0F172A] text-white p-8 sm:p-10 relative overflow-hidden">
+              <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-[#2563EB]/20 blur-3xl pointer-events-none"></div>
+              <div class="relative max-w-2xl space-y-4">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase">COLEGIO DE MONTALBAN • STUDENT SAFE SPACE</span>
+                  <span class="px-3 py-1 rounded-full bg-white/10 text-white/85 text-[11px] font-mono">2023-01842-CM-0</span>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-bold tracking-tight">Welcome back, Montalbano</h1>
+                <p class="text-sm font-medium text-[#06B6D4]">A Safe, Respectful Campus Space Built for You.</p>
+                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl">
+                  Report grievances confidentially, monitor disciplinary records, or schedule guidance consultations with the Office of Student Affairs.
+                </p>
+                <div class="flex flex-wrap gap-3 pt-2">
+                  <button data-goto="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-semibold transition-colors">
+                    <span>File Incident Report</span>
+                    ${getIcon('arrow', 'w-4 h-4')}
+                  </button>
+                  <button data-goto="clearance" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-[#F1F5F9] text-[#0F172A] text-xs sm:text-sm font-semibold transition-colors">
+                    <span class="text-[#06B6D4]">${getIcon('check', 'w-4 h-4')}</span>
+                    <span>View Disciplinary Clearance</span>
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5">
+                <div class="space-y-3">
+                  <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">
+                    ${getIcon('shield', 'w-4 h-4')}
+                  </div>
+                  <h3 class="text-base font-semibold text-[#0F172A]">Report an Incident or Bullying</h3>
+                  <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">100% confidential intake protected under CdM Student Privacy Policy.</p>
+                </div>
+                <button data-goto="submit" class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">File Report →</button>
+              </div>
+
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5">
+                <div class="space-y-3">
+                  <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">
+                    ${getIcon('check', 'w-4 h-4')}
+                  </div>
+                  <h3 class="text-base font-semibold text-[#0F172A]">Discipline Clearance Status</h3>
+                  <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">Instant verification of active sanctions and Good Moral certificate readiness.</p>
+                </div>
+                <button data-goto="clearance" class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Check Clearance →</button>
+              </div>
+
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5">
+                <div class="space-y-3">
+                  <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">
+                    ${getIcon('chat', 'w-4 h-4')}
+                  </div>
+                  <h3 class="text-base font-semibold text-[#0F172A]">OSAS Chat &amp; Consultation</h3>
+                  <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">Confidential 1-on-1 consultation desk with the Prefect and CGCC counselors.</p>
+                </div>
+                <button data-goto="chat" class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Launch OSAS Chat →</button>
+              </div>
+            </section>
+
+            <section class="bg-white rounded-2xl border border-slate-200/70 p-6 space-y-4">
+              <div class="flex items-center gap-2 text-sm font-semibold text-[#0F172A]">
+                <span class="text-[#06B6D4]">${getIcon('file', 'w-4 h-4')}</span>
+                <span>Colegio de Montalban Institutional Welfare Bulletin</span>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl bg-[#F1F5F9]/70">
+                  <div class="text-xs sm:text-sm font-semibold text-[#0F172A]">Anti-Bullying Commitment (RA 10627)</div>
+                  <p class="text-xs text-[#64748B] mt-1 leading-relaxed">Colegio de Montalban enforces zero tolerance for harassment, cyber-intimidation, or hazing. All reports are investigated with complete confidentiality.</p>
+                </div>
+                <div class="p-4 rounded-xl bg-[#F1F5F9]/70">
+                  <div class="text-xs sm:text-sm font-semibold text-[#0F172A]">College Guidance &amp; Counseling Center (CGCC)</div>
+                  <p class="text-xs text-[#64748B] mt-1 leading-relaxed">Restorative guidance sessions and mental health support are available Mondays through Fridays at CGCC Room 201 or via online consultation.</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        `;
+      }
+
+      function renderSubmitIncident() {
+        const isAnon = state.incidentIdentityMode === 'anonymous';
+        return `
+          <div class="rounded-2xl overflow-hidden border border-slate-200/70 bg-white">
+            <div class="bg-[#0F172A] text-white p-6 sm:p-8 flex flex-wrap items-start justify-between gap-4">
+              <div class="space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[#06B6D4] text-[11px] font-medium">
+                  ${getIcon('lock', 'w-3 h-3')} Zero-Knowledge Protected Portal
+                </span>
+                <h2 class="text-2xl font-bold tracking-tight">Report a Concern, Bullying, or Violation</h2>
+                <p class="text-xs text-slate-300">Protected under Republic Act 10627 (Anti-Bullying Act) and Republic Act 10173 (Data Privacy Act of 2012).</p>
+              </div>
+              <span class="text-xs font-mono text-slate-400">Form ID: CDM-IR-2026</span>
+            </div>
+
+            <form id="incident-form" class="p-6 sm:p-8 space-y-6">
+              <div class="space-y-3">
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">1. Reporting Identity Mode</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <button type="button" data-id-mode="anonymous" class="text-left p-4 rounded-xl border transition-all ${isAnon ? 'border-[#2563EB] bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'}">
+                    <div class="flex items-center gap-2.5">
+                      <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${isAnon ? 'border-[#2563EB]' : 'border-slate-300'}">
+                        ${isAnon ? '<span class="w-2 h-2 rounded-full bg-[#2563EB]"></span>' : ''}
+                      </span>
+                      <span class="text-sm font-semibold text-[#0F172A]">100% Anonymous Mode</span>
+                    </div>
+                    <p class="text-xs text-[#64748B] mt-1 pl-6">Zero student PII or credentials recorded publicly.</p>
+                  </button>
+                  <button type="button" data-id-mode="verified" class="text-left p-4 rounded-xl border transition-all ${!isAnon ? 'border-[#2563EB] bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'}">
+                    <div class="flex items-center gap-2.5">
+                      <span class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${!isAnon ? 'border-[#2563EB]' : 'border-slate-300'}">
+                        ${!isAnon ? '<span class="w-2 h-2 rounded-full bg-[#2563EB]"></span>' : ''}
+                      </span>
+                      <span class="text-sm font-semibold text-[#0F172A]">Verified Student Mode</span>
+                    </div>
+                    <p class="text-xs text-[#64748B] mt-1 pl-6">Provide Student ID for official administrative callback.</p>
+                  </button>
+                </div>
+                <div class="p-3.5 rounded-xl bg-[#F1F5F9]/80 flex items-center gap-2.5 text-xs text-[#0F172A]">
+                  <span class="text-[#06B6D4] shrink-0">${getIcon('shield', 'w-4 h-4')}</span>
+                  <span>Your identity is protected under CdM Student Privacy Policy. The Prefect sees confirmed validation without public exposure.</span>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">2. Involved Parties</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Involved Student Number *</label>
+                    <input id="inc-student-id" type="text" required placeholder="e.g. 2023-01842-CM-0" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                    <p class="text-[11px] text-[#64748B] mt-1">Format: YYYY-XXXXX-CM-0</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Involved Student Full Name *</label>
+                    <input id="inc-student-name" type="text" required placeholder="e.g. Juan De La Cruz" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">3. Incident Classification &amp; Location</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Incident Classification *</label>
+                    <select id="inc-class" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
+                      <option>Bullying / Harassment</option>
+                      <option>Campus Disruption</option>
+                      <option>Academic Dishonesty / Plagiarism</option>
+                      <option>Vandalism / Property Damage</option>
+                      <option>Uniform &amp; Grooming Violation</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Academic Institute *</label>
+                    <select id="inc-inst" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
+                      <option value="ICS">ICS - Institute of Computer Studies</option>
+                      <option value="IEd">IEd - Institute of Education</option>
+                      <option value="IBA">IBA - Institute of Business Administration</option>
+                      <option value="IE">IE - Institute of Engineering</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Incident Date &amp; Approximate Time *</label>
+                    <input id="inc-date" type="datetime-local" value="2026-11-17T06:08" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Campus Location or Online Channel *</label>
+                    <input id="inc-location" type="text" required placeholder="e.g. 3F ICS Lab, Canteen, Messenger GC" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">4. Detailed Incident Narrative *</label>
+                  <span class="text-[11px] text-[#64748B]">Minimum 20 characters</span>
+                </div>
+                <textarea id="inc-narrative" rows="4" required minlength="20" placeholder="Describe what transpired, persons involved, names of witnesses, and any immediate safety concerns..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]"></textarea>
+              </div>
+
+              <label class="flex items-start gap-3 p-4 rounded-xl bg-[#F1F5F9]/70 cursor-pointer">
+                <input id="inc-cgcc" type="checkbox" class="mt-0.5 w-4 h-4 rounded text-[#2563EB] focus:ring-[#06B6D4]" />
+                <div class="text-xs">
+                  <div class="font-medium text-[#0F172A]">Request priority psychological or counseling intervention with the College Guidance &amp; Counseling Center (CGCC).</div>
+                  <div class="text-[#64748B] mt-0.5">Flag this incident for restorative behavioral counseling and psycho-social guidance intervention.</div>
+                </div>
+              </label>
+
+              <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="reset" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors">Clear Form</button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-semibold transition-colors">Submit Incident Report →</button>
+              </div>
+            </form>
+          </div>
+        `;
+      }
+
+      function renderStudentTickets() {
+        const myCases = state.cases.filter(c => c.mine);
+        return `
+          <div class="rounded-2xl overflow-hidden border border-slate-200/70 bg-white">
+            <div class="bg-[#0F172A] text-white p-6 sm:p-8 space-y-1.5">
+              <span class="inline-block px-2.5 py-0.5 rounded-full bg-white/10 text-[#06B6D4] text-[10px] font-semibold tracking-wider uppercase">Official OSAS Incident Docket</span>
+              <h2 class="text-2xl font-bold">My Submitted Tickets</h2>
+              <p class="text-xs text-slate-300">Track real-time status updates and Prefect resolution actions for reports filed on this device.</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+                    <th class="py-4 px-5">Docket #</th>
+                    <th class="py-4 px-5">Classification &amp; Location</th>
+                    <th class="py-4 px-5">Involved Student</th>
+                    <th class="py-4 px-5">Referral</th>
+                    <th class="py-4 px-5">Live Status</th>
+                    <th class="py-4 px-5">Office Resolution Notes</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-sm">
+                  ${myCases.map(c => `
+                    <tr class="hover:bg-[#F1F5F9]/40 transition-colors">
+                      <td class="py-4 px-5 font-mono text-xs font-semibold text-[#2563EB] whitespace-nowrap">
+                        <button data-inspect="${c.docket}" class="hover:underline">${c.docket}</button>
+                      </td>
+                      <td class="py-4 px-5">
+                        <div class="font-semibold text-[#0F172A]">${c.classification}</div>
+                        <div class="text-xs text-[#64748B] mt-0.5">${c.date} • ${c.location}</div>
+                      </td>
+                      <td class="py-4 px-5">
+                        <div class="font-medium text-[#0F172A]">${c.student}</div>
+                        <div class="text-xs text-[#64748B]">${c.institute}</div>
+                      </td>
+                      <td class="py-4 px-5">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50/80 text-[#2563EB] whitespace-nowrap">${c.referral} Referral</span>
+                      </td>
+                      <td class="py-4 px-5">${statusBadge(c.status)}</td>
+                      <td class="py-4 px-5 text-xs text-[#64748B] max-w-xs leading-relaxed">${c.notes}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderClearanceStatus() {
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200/70 p-6 sm:p-8 space-y-6">
+            <div class="pb-4 border-b border-slate-100">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <h2 class="text-xl font-bold text-[#0F172A]">Good Moral &amp; Disciplinary Clearance Status</h2>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700">Real-Time</span>
+              </div>
+              <p class="text-xs text-[#64748B] mt-1">Official Colegio de Montalban automated verification for graduation, transfer credentials, and Certificate of Good Moral Character.</p>
+            </div>
+
+            <div class="rounded-2xl border border-emerald-200/80 bg-emerald-50/20 p-6 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="px-2.5 py-1 rounded-lg bg-white border border-emerald-200/80 text-emerald-700 text-[10px] font-bold tracking-wider uppercase">Discipline Verified</span>
+                  <span class="text-xs text-[#64748B]">Institutional Standing: <strong class="text-[#0F172A]">Exemplary</strong></span>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-white border border-slate-200/80 text-xs font-medium text-[#0F172A]">Cleared for Issuance</span>
+              </div>
+
+              <div class="pt-1">
+                <h3 class="text-lg font-semibold text-[#0F172A]">Good Moral &amp; Disciplinary Clearance</h3>
+                <p class="text-xs text-[#64748B] mt-1">Official clearance record for Student ID: <span class="px-2 py-0.5 rounded bg-white border border-slate-200/80 font-mono text-[#0F172A]">2023-01842-CM-0</span></p>
+                <p class="text-xs sm:text-sm text-[#0F172A] mt-3 leading-relaxed">
+                  The institutional discipline registry confirms that you are in good disciplinary standing with Colegio de Montalban. No active grievances, unresolved dockets, or outstanding behavioral sanctions are recorded against your student account.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-200/60 text-xs text-[#64748B]">
+                <span>Verified: <span class="font-mono text-[#0F172A]">11/17/2026, 6:09:27 AM</span></span>
+                <span>Verification Code: <span class="px-2 py-0.5 rounded bg-white border border-slate-200/80 font-mono text-[#0F172A]">CdM-VERIFIED-8420</span></span>
+              </div>
+
+              <button id="print-cert-btn" class="w-full py-3 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                ${getIcon('file', 'w-4 h-4')}
+                <span>Print / View Certificate of Good Moral</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderBookConsultation() {
+        const slots = [
+          { label: '08:30 AM - 09:15 AM', booked: false },
+          { label: '09:30 AM - 10:15 AM', booked: false },
+          { label: '10:30 AM - 11:15 AM', booked: false },
+          { label: '01:00 PM - 01:45 PM', booked: true },
+          { label: '02:00 PM - 02:45 PM', booked: false },
+          { label: '03:00 PM - 03:45 PM', booked: false }
+        ];
+        return `
+          <div class="space-y-6">
+            <section class="rounded-2xl bg-[#0F172A] text-white p-7 sm:p-9 space-y-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase">OSAS PREFECT &amp; CGCC GUIDANCE SERVICES</span>
+                <span class="px-3 py-1 rounded-full bg-white/10 text-[#06B6D4] text-[11px] font-medium">Face-to-Face &amp; Digital Queue Active</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Consultation Booking &amp; Walk-In Desk</h2>
+              <p class="text-xs sm:text-sm text-slate-300 max-w-2xl">Schedule formal face-to-face appointments with the Prefect of Discipline or College Guidance &amp; Counseling Center (CGCC Room 201), or claim a live digital walk-in ticket.</p>
+            </section>
+
+            <div class="flex flex-wrap gap-2 pb-4 border-b border-slate-200/70">
+              <button data-bmode="scheduled" class="px-4 py-2 rounded-full text-xs font-medium transition-colors ${state.bookingMode === 'scheduled' ? 'bg-[#2563EB] text-white' : 'bg-white border border-slate-200/80 text-[#64748B] hover:text-[#0F172A]'}">Mode A: Scheduled Face-to-Face</button>
+              <button data-bmode="walkin" class="px-4 py-2 rounded-full text-xs font-medium transition-colors ${state.bookingMode === 'walkin' ? 'bg-[#2563EB] text-white' : 'bg-white border border-slate-200/80 text-[#64748B] hover:text-[#0F172A]'}">Mode B: Walk-In Queue Pass</button>
+              <button data-bmode="mybookings" class="px-4 py-2 rounded-full text-xs font-medium transition-colors ${state.bookingMode === 'mybookings' ? 'bg-[#2563EB] text-white' : 'bg-white border border-slate-200/80 text-[#64748B] hover:text-[#0F172A]'}">My Bookings &amp; Tickets (${state.bookings.length})</button>
+            </div>
+
+            ${state.bookingMode === 'scheduled' ? `
+              <form id="booking-form" class="bg-white rounded-2xl border border-slate-200/70 p-6 sm:p-8 space-y-6">
+                <div class="space-y-3">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-6 h-6 rounded-lg bg-[#F1F5F9] text-[#2563EB] text-xs font-bold flex items-center justify-center">1</span>
+                    <span class="text-sm font-semibold text-[#0F172A]">Select Consultation Office &amp; Category</span>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button type="button" data-office="OSAS Prefect Office" class="text-left p-4 rounded-xl border transition-all ${state.bookingOffice === 'OSAS Prefect Office' ? 'border-[#2563EB] bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'}">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="font-semibold text-sm text-[#0F172A]">OSAS Prefect Office</span>
+                        <span class="px-2 py-0.5 rounded bg-[#F1F5F9] text-[#64748B] text-[10px] font-medium">Admin Wing Rm 102</span>
+                      </div>
+                      <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">Disciplinary case reviews, grievance conciliations, and formal Certificate of Good Moral inquiries.</p>
+                    </button>
+                    <button type="button" data-office="CGCC Guidance & Counseling" class="text-left p-4 rounded-xl border transition-all ${state.bookingOffice === 'CGCC Guidance & Counseling' ? 'border-[#2563EB] bg-blue-50/30' : 'border-slate-200 hover:border-slate-300'}">
+                      <div class="flex items-center justify-between gap-2">
+                        <span class="font-semibold text-sm text-[#0F172A]">CGCC Guidance &amp; Counseling</span>
+                        <span class="px-2 py-0.5 rounded bg-[#F1F5F9] text-[#64748B] text-[10px] font-medium">CGCC Room 201</span>
+                      </div>
+                      <p class="text-xs text-[#64748B] mt-1.5 leading-relaxed">Restorative counseling, emotional wellness support, peer mediation, and stress alleviation consultations.</p>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Consultation Nature / Classification</label>
+                  <select id="book-nature" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
+                    <option>Disciplinary Case Inquiry / Preliminary Conference</option>
+                    <option>Restorative Guidance Session</option>
+                    <option>Good Moral Certificate Follow-Up</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Preferred Consultation Date</label>
+                  <input id="book-date" type="date" value="2026-11-18" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                </div>
+
+                <div class="space-y-2.5">
+                  <div class="text-xs font-medium text-[#0F172A]">Available Consultation Time Slots <span class="text-[#64748B]">(Already booked slots are disabled)</span></div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    ${slots.map(s => {
+                      const selected = state.bookingSlot === s.label;
+                      if (s.booked) {
+                        return `<div class="px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-[#64748B] text-xs font-medium flex items-center justify-between cursor-not-allowed"><span>${s.label}</span><span>Booked</span></div>`;
+                      }
+                      return `
+                        <button type="button" data-slot="${s.label}" class="px-4 py-2.5 rounded-xl border text-xs font-medium flex items-center justify-between transition-colors ${selected ? 'bg-[#2563EB] border-[#2563EB] text-white' : 'bg-white border-slate-200 text-[#0F172A] hover:border-[#06B6D4]'}">
+                          <span>${s.label}</span>
+                          <span>${selected ? 'Selected ✓' : 'Available'}</span>
+                        </button>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-medium text-[#0F172A] mb-1.5">Brief Summary of Concern <span class="text-[#64748B]">(Confidential to Desk Officer)</span></label>
+                  <textarea id="book-summary" rows="3" placeholder="Mention any related case docket numbers, course subject, or specific guidance assistance required..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]"></textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                  <span class="text-xs text-[#64748B]">Confirmation notice will be sent to your student notification bell.</span>
+                  <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Confirm &amp; Book Appointment →</button>
+                </div>
+              </form>
+            ` : state.bookingMode === 'walkin' ? `
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-8 text-center space-y-4">
+                <div class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Live On-Campus Queue</div>
+                <div class="text-3xl font-bold font-mono text-[#0F172A]">Now Serving: WALK-IN #W-0${state.walkInServing}</div>
+                <p class="text-sm text-[#64748B]">${state.walkInWaiting} students waiting in queue</p>
+                <button id="claim-walkin-btn" class="px-6 py-3 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-medium transition-colors">Claim Digital Walk-In Ticket</button>
+              </div>
+            ` : `
+              <div class="bg-white rounded-2xl border border-slate-200/70 divide-y divide-slate-100">
+                ${state.bookings.map(b => `
+                  <div class="p-5 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="font-mono text-xs font-semibold text-[#2563EB]">${b.id}</span>
+                        <span class="text-sm font-semibold text-[#0F172A]">${b.office}</span>
+                      </div>
+                      <div class="text-xs text-[#64748B] mt-0.5">${b.nature} • ${b.date} at ${b.time}</div>
+                    </div>
+                    ${statusBadge(b.status)}
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      }
+
+      function renderChat() {
+        const filters = ['All', 'Active', 'Follow-Up', 'Resolved'];
+        const filteredChats = state.chats.filter(c => {
+          const matchFilter = state.chatFilter === 'All' || c.status === state.chatFilter;
+          const q = state.chatSearch.toLowerCase();
+          const matchSearch = !q || c.title.toLowerCase().includes(q) || c.id.toLowerCase().includes(q);
+          return matchFilter && matchSearch;
+        });
+        const activeChat = state.chats.find(c => c.id === state.activeChatId) || state.chats[0];
+        const linkedCase = state.cases.find(c => c.docket === activeChat.id);
+
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200/70 overflow-hidden grid grid-cols-1 lg:grid-cols-12 min-h-[600px]">
+            <div class="lg:col-span-4 xl:col-span-3 border-b lg:border-b-0 lg:border-r border-slate-200/70 flex flex-col">
+              <div class="p-4 border-b border-slate-100 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h2 class="text-base font-semibold text-[#0F172A]">Chats</h2>
+                  <span class="text-xs text-[#64748B]">${state.chats.length}</span>
+                </div>
+                <div class="relative">
+                  <span class="absolute left-3 top-2.5 text-[#64748B]">${getIcon('search', 'w-4 h-4')}</span>
+                  <input id="chat-search-input" type="text" value="${state.chatSearch}" placeholder="Search Messenger" class="w-full pl-9 pr-3 py-2 rounded-full bg-[#F1F5F9] text-xs text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  ${filters.map(f => `
+                    <button data-cfilter="${f}" class="px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${state.chatFilter === f ? 'bg-[#2563EB] text-white' : 'bg-[#F1F5F9] text-[#64748B] hover:text-[#0F172A]'}">${f}</button>
+                  `).join('')}
+                </div>
+              </div>
+              <div class="flex-1 overflow-y-auto divide-y divide-slate-100">
+                ${filteredChats.map(c => `
+                  <button data-chat-id="${c.id}" class="w-full text-left p-3.5 transition-colors ${c.id === activeChat.id ? 'bg-[#F1F5F9]/80 border-l-2 border-[#2563EB]' : 'hover:bg-[#F1F5F9]/40'}">
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-xs font-semibold text-[#0F172A] truncate">${c.title}</span>
+                      <span class="text-[11px] text-[#64748B] shrink-0">${c.time}</span>
+                    </div>
+                    <div class="text-xs text-[#64748B] truncate mt-1">${c.preview}</div>
+                    <div class="flex items-center justify-between mt-2">
+                      <span class="text-[11px] font-mono text-[#64748B]">#${c.id}</span>
+                      ${statusBadge(c.status)}
+                    </div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <div class="${state.showDossier ? 'lg:col-span-5 xl:col-span-6' : 'lg:col-span-8 xl:col-span-9'} flex flex-col">
+              <div class="p-4 border-b border-slate-100 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-[#06B6D4]"></span>
+                    <span class="text-sm font-semibold text-[#0F172A] truncate">Office of Student Affairs &amp; Services (Prefect Desk)</span>
+                  </div>
+                  <div class="text-xs text-[#64748B] mt-0.5">#${activeChat.id} • ${activeChat.title}</div>
+                </div>
+                <button id="toggle-dossier-btn" class="px-3 py-1.5 rounded-full border border-slate-200/80 text-xs font-medium text-[#0F172A] hover:bg-[#F1F5F9]">
+                  ${state.showDossier ? 'Hide Dossier' : 'Case Dossier'}
+                </button>
+              </div>
+
+              <div class="flex-1 p-4 sm:p-5 space-y-4 overflow-y-auto bg-white">
+                ${activeChat.messages.map(m => {
+                  const isMine = (state.role === 'student' && m.from === 'student') || (state.role === 'prefect' && m.from === 'officer');
+                  return `
+                    <div class="flex flex-col ${isMine ? 'items-end' : 'items-start'}">
+                      <div class="text-[11px] text-[#64748B] mb-1 px-1">${m.from === 'officer' ? activeChat.officer : 'You'} • ${m.time}</div>
+                      <div class="max-w-md rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed ${isMine ? 'bg-[#2563EB] text-white' : 'bg-[#F1F5F9] text-[#0F172A]'}">
+                        <p>${m.text}</p>
+                        ${m.attachment ? `
+                          <div class="mt-3 p-3 rounded-xl bg-white text-[#0F172A] border border-slate-200/80 flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                              <div class="text-xs font-semibold truncate">${m.attachment}</div>
+                              <div class="text-[11px] text-[#64748B]">Evidentiary screen capture • 1.2 MB</div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 shrink-0">VERIFIED</span>
+                          </div>
+                        ` : ''}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              <form id="chat-send-form" class="p-3.5 border-t border-slate-100 bg-white flex items-center gap-2">
+                <input id="chat-input" type="text" placeholder="Write a confidential message..." class="flex-1 px-4 py-2.5 rounded-full bg-[#F1F5F9] text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                <button type="submit" class="px-5 py-2.5 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Send</button>
+              </form>
+            </div>
+
+            ${state.showDossier ? `
+              <div class="lg:col-span-3 border-t lg:border-t-0 lg:border-l border-slate-200/70 p-4 space-y-4 bg-white">
+                <div class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Case Dossier</div>
+                <div class="space-y-3 text-xs">
+                  <div>
+                    <div class="text-[#64748B]">Docket Status</div>
+                    <div class="mt-1">${statusBadge(linkedCase ? linkedCase.status : activeChat.status)}</div>
+                  </div>
+                  <div class="pt-3 border-t border-slate-100">
+                    <div class="text-[#64748B]">Involved Student</div>
+                    <div class="font-semibold text-[#0F172A] mt-1">${linkedCase ? linkedCase.student : 'Protected Reporter'}</div>
+                    <div class="text-[#64748B] mt-0.5">Protected under OSAS protocols.</div>
+                  </div>
+                  <div class="pt-3 border-t border-slate-100">
+                    <div class="text-[#64748B]">Prefect Directive</div>
+                    <div class="text-[#0F172A] mt-1">Pending formal Board conciliation hearing</div>
+                  </div>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      // --- PREFECT VIEWS ---
+      function renderKpiRow() {
+        const total = state.cases.length;
+        const pending = state.cases.filter(c => c.status === 'Pending Hearing').length;
+        const inv = state.cases.filter(c => c.status === 'Under Investigation').length;
+        const guidance = state.cases.filter(c => c.referral === 'Guidance').length;
+        return `
+          <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl border border-slate-200/70 p-5 flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">Total Inquiries</div>
+                <div class="text-2xl font-bold text-[#0F172A] mt-1">${total}</div>
+                <div class="text-xs text-[#64748B] mt-0.5">AY 2024–2025 Registry</div>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">${getIcon('file', 'w-4 h-4')}</div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200/70 p-5 flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">Pending Hearing</div>
+                <div class="text-2xl font-bold text-[#0F172A] mt-1">${pending}</div>
+                <div class="text-xs text-[#64748B] mt-0.5">Awaiting Board Disposition</div>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">${getIcon('clock', 'w-4 h-4')}</div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200/70 p-5 flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-[#2563EB]">Under Investigation</div>
+                <div class="text-2xl font-bold text-[#2563EB] mt-1">${inv}</div>
+                <div class="text-xs text-[#64748B] mt-0.5">Active Inquiry &amp; Conciliation</div>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">${getIcon('search', 'w-4 h-4')}</div>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200/70 p-5 flex items-center justify-between">
+              <div>
+                <div class="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">Guidance Referrals</div>
+                <div class="text-2xl font-bold text-[#0F172A] mt-1">${guidance}</div>
+                <div class="text-xs text-[#64748B] mt-0.5">Endorsed to CGCC Desk</div>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">${getIcon('shield', 'w-4 h-4')}</div>
+            </div>
+          </section>
+        `;
+      }
+
+      function renderPrefectOverview() {
+        return `
+          <div class="space-y-6">
+            <section class="rounded-2xl bg-[#0F172A] text-white p-8 sm:p-10 space-y-4">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase">EXECUTIVE OVERVIEW</span>
+                <span class="text-xs font-mono text-slate-400">AY 2024–2025 Registry</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Office of the Prefect &amp; Student Affairs • Institutional Overview</h2>
+              <p class="text-xs sm:text-sm text-slate-300 max-w-2xl">Consolidated grievance telemetry, incident docketing statistics, and disciplinary clearance validation desk.</p>
+              <div class="pt-1">
+                <button data-goto="registry" class="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Open Case Registry →</button>
+              </div>
+            </section>
+
+            ${renderKpiRow()}
+
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-4">
+                <div class="space-y-2">
+                  <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">${getIcon('file', 'w-4 h-4')}</div>
+                  <h3 class="text-base font-semibold text-[#0F172A]">Review Active Inquiries</h3>
+                  <p class="text-xs text-[#64748B] leading-relaxed">Inspect pending incident reports and manage formal Prefect hearing dockets.</p>
+                </div>
+                <button data-goto="registry" class="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Open Registry →</button>
+              </div>
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-4">
+                <div class="space-y-2">
+                  <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">${getIcon('check', 'w-4 h-4')}</div>
+                  <h3 class="text-base font-semibold text-[#0F172A]">Run Clearance Verification</h3>
+                  <p class="text-xs text-[#64748B] leading-relaxed">Query any student ID for active disciplinary holds or Certificate of Good Moral eligibility.</p>
+                </div>
+                <button data-goto="verify" class="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Launch Validator →</button>
+              </div>
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-4">
+                <div class="space-y-2">
+                  <div class="w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center">${getIcon('chat', 'w-4 h-4')}</div>
+                  <h3 class="text-base font-semibold text-[#0F172A]">OSAS Chat Desk</h3>
+                  <p class="text-xs text-[#64748B] leading-relaxed">Conduct confidential 1-on-1 hearings, issue follow-up notices, and transmit evidentiary files.</p>
+                </div>
+                <button data-goto="chat" class="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Launch OSAS Chat →</button>
+              </div>
+            </section>
+          </div>
+        `;
+      }
+
+      function renderPrefectRegistry() {
+        const q = state.registrySearch.toLowerCase();
+        const filtered = state.cases.filter(c => {
+          const matchQ = !q || c.docket.toLowerCase().includes(q) || c.student.toLowerCase().includes(q) || c.classification.toLowerCase().includes(q);
+          const matchInst = state.registryInstitute === 'All' || c.institute === state.registryInstitute;
+          const matchStatus = state.registryStatus === 'All' || c.status === state.registryStatus;
+          return matchQ && matchInst && matchStatus;
+        });
+
+        return `
+          <div class="space-y-6">
+            ${renderKpiRow()}
+
+            <div class="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
+              <div class="p-6 border-b border-slate-100 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 class="text-xl font-bold text-[#0F172A]">Disciplinary Case Registry</h2>
+                    <p class="text-xs text-[#64748B]">Searchable institutional record of student infractions, inquiries, and board dispositions.</p>
+                  </div>
+                  <span class="text-xs font-medium text-[#64748B]">${filtered.length} of ${state.cases.length} records</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <input id="reg-search" type="text" value="${state.registrySearch}" placeholder="Filter by name, ID, or docket..." class="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+                  <select id="reg-inst" class="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
+                    <option value="All" ${state.registryInstitute === 'All' ? 'selected' : ''}>All Institutes (ICS, IEd, IBA, IE)</option>
+                    <option value="ICS" ${state.registryInstitute === 'ICS' ? 'selected' : ''}>ICS</option>
+                    <option value="IEd" ${state.registryInstitute === 'IEd' ? 'selected' : ''}>IEd</option>
+                    <option value="IBA" ${state.registryInstitute === 'IBA' ? 'selected' : ''}>IBA</option>
+                    <option value="IE" ${state.registryInstitute === 'IE' ? 'selected' : ''}>IE</option>
+                  </select>
+                  <select id="reg-status" class="px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#06B6D4]">
+                    <option value="All" ${state.registryStatus === 'All' ? 'selected' : ''}>All Case Statuses</option>
+                    <option value="Pending Hearing" ${state.registryStatus === 'Pending Hearing' ? 'selected' : ''}>Pending Hearing</option>
+                    <option value="Under Investigation" ${state.registryStatus === 'Under Investigation' ? 'selected' : ''}>Under Investigation</option>
+                    <option value="Resolved" ${state.registryStatus === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                  </select>
+                  <button id="reg-reset" class="px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-medium text-[#0F172A] hover:bg-[#F1F5F9]">Reset Filters</button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-200/80 bg-[#F1F5F9]/40 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+                      <th class="py-3.5 px-4">Docket #</th>
+                      <th class="py-3.5 px-4">Involved Student</th>
+                      <th class="py-3.5 px-4">Institute</th>
+                      <th class="py-3.5 px-4">Classification &amp; Details</th>
+                      <th class="py-3.5 px-4">Referral</th>
+                      <th class="py-3.5 px-4">Status Indicator</th>
+                      <th class="py-3.5 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100 text-sm">
+                    ${filtered.map(c => {
+                      const revealed = !!state.revealedDockets[c.docket];
+                      return `
+                        <tr class="hover:bg-[#F1F5F9]/40 transition-colors">
+                          <td class="py-4 px-4 font-mono text-xs font-semibold text-[#2563EB] whitespace-nowrap">${c.docket}</td>
+                          <td class="py-4 px-4">
+                            <div class="font-semibold text-[#0F172A] text-xs sm:text-sm">${revealed ? c.realName : c.student}</div>
+                            ${c.protectedIdentity ? `
+                              <div class="flex items-center gap-2 mt-1">
+                                <span class="px-2 py-0.5 rounded bg-[#F1F5F9] text-[10px] font-medium text-[#64748B]">AES-256 Confidential</span>
+                                <button data-reveal="${c.docket}" class="text-xs font-medium text-[#2563EB] hover:underline">${revealed ? 'Mask' : 'Reveal'}</button>
+                              </div>
+                            ` : `<div class="text-xs font-mono text-[#64748B] mt-0.5">${c.realName.match(/\((.*?)\)/)?.[1] || ''}</div>`}
+                          </td>
+                          <td class="py-4 px-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F1F5F9] text-[#0F172A]">${c.institute}</span>
+                          </td>
+                          <td class="py-4 px-4">
+                            <div class="font-semibold text-[#0F172A] text-xs sm:text-sm">${c.classification}</div>
+                            <div class="text-xs text-[#64748B] mt-0.5">${c.date} • ${c.location}</div>
+                          </td>
+                          <td class="py-4 px-4">
+                            ${c.referral === 'Guidance'
+                              ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50/80 text-[#2563EB]">Guidance</span>'
+                              : '<span class="text-xs text-[#64748B]">Standard</span>'}
+                          </td>
+                          <td class="py-4 px-4">${statusBadge(c.status)}</td>
+                          <td class="py-4 px-4 text-right whitespace-nowrap space-x-1.5">
+                            <button data-inspect="${c.docket}" class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-[#0F172A] hover:bg-[#F1F5F9]">Inspect</button>
+                            <button data-resolve="${c.docket}" class="px-3 py-1.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-medium">Resolve</button>
+                          </td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderPrefectVerify() {
+        const res = state.clearanceResult;
+        return `
+          <div class="bg-white rounded-2xl border border-slate-200/70 p-6 sm:p-8 space-y-6">
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <h2 class="text-xl font-bold text-[#0F172A]">Good Moral &amp; Discipline Clearance Verification Tool</h2>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#F1F5F9] text-[#0F172A]">Real-Time Validator</span>
+              </div>
+              <p class="text-xs text-[#64748B] mt-1">Validates active administrative holds, pending discipline hearings, or unfulfilled community sanctions against student ID.</p>
+            </div>
+
+            <form id="verify-form" class="flex flex-col sm:flex-row gap-3 pt-2 border-t border-slate-100">
+              <input id="verify-input" type="text" value="${state.clearanceQuery}" placeholder="e.g. 2023-08124-CM-0" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#06B6D4]" />
+              <button type="submit" class="px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium whitespace-nowrap transition-colors">Verify Clearance Status</button>
+            </form>
+
+            <div class="p-4 rounded-xl bg-[#F1F5F9]/60 space-y-2.5">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">Quick Test Records</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                ${Object.entries(state.testRecords).map(([id, rec]) => `
+                  <button type="button" data-test-id="${id}" class="p-3 rounded-xl border border-slate-200/80 bg-white hover:border-[#06B6D4] text-center transition-colors">
+                    <div class="text-xs font-semibold text-[#0F172A]">Test ${rec.standing}</div>
+                    <div class="text-[11px] font-mono text-[#64748B] mt-0.5">(${id})</div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            ${res ? `
+              <div class="p-5 rounded-xl border ${res.cleared ? 'border-emerald-200 bg-emerald-50/30' : 'border-amber-200 bg-amber-50/30'} space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-sm font-semibold text-[#0F172A]">${res.name}</span>
+                  ${statusBadge(res.standing)}
+                </div>
+                <div class="text-xs text-[#64748B]">Docket Reference: <strong class="text-[#0F172A]">${res.docket}</strong></div>
+                <p class="text-sm text-[#0F172A]">${res.note}</p>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+
+      function renderPrefectQueue() {
+        return `
+          <div class="space-y-6">
+            <section class="rounded-2xl bg-[#0F172A] text-white p-7 sm:p-9 space-y-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase">OSAS PREFECT DESK &amp; CGCC QUEUE ENGINE</span>
+                <span class="px-3 py-1 rounded-full bg-white/10 text-[#06B6D4] text-[11px] font-medium">Active Consultation Hub</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">Consultations &amp; Live Walk-In Queue</h2>
+              <p class="text-xs sm:text-sm text-slate-300 max-w-2xl">Coordinate face-to-face hearings, restorative counseling sessions, and manage real-time on-campus walk-in ticket flows.</p>
+            </section>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 space-y-5">
+                <div class="flex items-center justify-between">
+                  <div class="text-sm font-semibold text-[#0F172A]">On-Campus Walk-In Queue Dispatcher</div>
+                  <div class="text-xs text-[#64748B]">OSAS Rm 102 &amp; CGCC Rm 201</div>
+                </div>
+                <div class="p-6 rounded-xl bg-[#F1F5F9]/70 text-center space-y-2">
+                  <div class="text-xs font-medium text-[#64748B]">Current Serving Ticket</div>
+                  <div class="text-2xl sm:text-3xl font-bold font-mono text-[#0F172A]">Now Serving: WALK-IN #W-0${state.walkInServing}</div>
+                  <div class="text-xs text-[#64748B]">Student Present at Desk • ${state.walkInWaiting} waiting</div>
+                </div>
+                <button id="next-ticket-btn" class="w-full py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors">Call Next Walk-In Ticket →</button>
+              </div>
+
+              <div class="bg-white rounded-2xl border border-slate-200/70 p-6 space-y-4">
+                <div class="text-xs font-semibold uppercase tracking-wider text-[#64748B]">Consultation Quick Stats</div>
+                <div class="divide-y divide-slate-100 text-sm">
+                  <div class="py-2.5 flex items-center justify-between">
+                    <span class="text-[#64748B]">Confirmed Scheduled:</span>
+                    <span class="font-semibold text-[#2563EB]">${state.bookings.filter(b => b.status === 'Confirmed').length}</span>
+                  </div>
+                  <div class="py-2.5 flex items-center justify-between">
+                    <span class="text-[#64748B]">Pending Review:</span>
+                    <span class="font-semibold text-[#0F172A]">2</span>
+                  </div>
+                  <div class="py-2.5 flex items-center justify-between">
+                    <span class="text-[#64748B]">Completed Sessions:</span>
+                    <span class="font-semibold text-[#0F172A]">${state.bookings.filter(b => b.status === 'Completed').length}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function render() {
+        renderChrome();
+        const main = document.getElementById('main-content');
+        const map = {
+          home: renderStudentHome,
+          submit: renderSubmitIncident,
+          tickets: renderStudentTickets,
+          clearance: renderClearanceStatus,
+          consultation: renderBookConsultation,
+          chat: renderChat,
+          overview: renderPrefectOverview,
+          registry: renderPrefectRegistry,
+          verify: renderPrefectVerify,
+          queue: renderPrefectQueue
+        };
+        main.innerHTML = (map[state.view] || renderStudentHome)();
+        bindViewEvents();
+      }
+
+      function bindViewEvents() {
+        document.querySelectorAll('[data-goto]').forEach(btn => {
+          btn.addEventListener('click', () => { state.view = btn.dataset.goto; render(); });
+        });
+        document.querySelectorAll('[data-inspect]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const c = state.cases.find(x => x.docket === btn.dataset.inspect);
+            if (!c) return;
+            openModal(`Case Docket ${c.docket}`, `
+              <div class="space-y-3">
+                <div class="flex items-center justify-between"><span class="font-semibold">${c.classification}</span>${statusBadge(c.status)}</div>
+                <div class="text-xs text-[#64748B]">Involved: <strong class="text-[#0F172A]">${c.student}</strong> (${c.institute})</div>
+                <div class="text-xs text-[#64748B]">${c.date} • ${c.location}</div>
+                <div class="p-3 rounded-xl bg-[#F1F5F9] text-xs">${c.notes}</div>
+              </div>
+            `);
+          });
+        });
+
+        document.querySelectorAll('[data-id-mode]').forEach(btn => {
+          btn.addEventListener('click', () => { state.incidentIdentityMode = btn.dataset.idMode; render(); });
+        });
+        const incForm = document.getElementById('incident-form');
+        if (incForm) {
+          incForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const docketNum = `CDM-2024-00${state.cases.length + 1}`;
+            const isAnon = state.incidentIdentityMode === 'anonymous';
+            state.cases.unshift({
+              docket: docketNum,
+              student: isAnon ? `Anonymous Montalbano #${Math.floor(1000 + Math.random() * 8999)}` : document.getElementById('inc-student-name').value.trim(),
+              realName: `${document.getElementById('inc-student-name').value.trim()} (${document.getElementById('inc-student-id').value.trim()})`,
+              protectedIdentity: isAnon,
+              institute: document.getElementById('inc-inst').value,
+              classification: document.getElementById('inc-class').value,
+              date: document.getElementById('inc-date').value.replace('T', ' '),
+              location: document.getElementById('inc-location').value.trim(),
+              referral: document.getElementById('inc-cgcc').checked ? 'Guidance' : 'Standard',
+              status: 'Pending Hearing',
+              notes: document.getElementById('inc-narrative').value.trim(),
+              mine: true
+            });
+            showToast(`Incident report ${docketNum} submitted.`, 'success');
+            state.view = 'tickets';
+            render();
+          });
+        }
+
+        const printBtn = document.getElementById('print-cert-btn');
+        if (printBtn) {
+          printBtn.addEventListener('click', () => {
+            openModal('Certificate of Good Moral Character', `
+              <div class="border border-slate-200 rounded-xl p-6 text-center space-y-3">
+                <div class="text-xs font-semibold uppercase tracking-widest text-[#2563EB]">Colegio de Montalban</div>
+                <div class="text-lg font-bold text-[#0F172A]">Certificate of Good Moral Character</div>
+                <p class="text-xs text-[#64748B]">Student ID <strong class="text-[#0F172A]">2023-01842-CM-0</strong> has no pending disciplinary sanctions as of 11/17/2026.</p>
+                <div class="font-mono text-xs text-[#0F172A]">CdM-VERIFIED-8420</div>
+              </div>
+            `);
+          });
+        }
+
+        document.querySelectorAll('[data-bmode]').forEach(btn => { btn.addEventListener('click', () => { state.bookingMode = btn.dataset.bmode; render(); }); });
+        document.querySelectorAll('[data-office]').forEach(btn => { btn.addEventListener('click', () => { state.bookingOffice = btn.dataset.office; render(); }); });
+        document.querySelectorAll('[data-slot]').forEach(btn => { btn.addEventListener('click', () => { state.bookingSlot = btn.dataset.slot; render(); }); });
+        const bookForm = document.getElementById('booking-form');
+        if (bookForm) {
+          bookForm.addEventListener('submit', e => {
+            e.preventDefault();
+            state.bookings.unshift({
+              id: `BK-${105 + state.bookings.length}`,
+              office: state.bookingOffice,
+              nature: document.getElementById('book-nature').value,
+              date: document.getElementById('book-date').value,
+              time: state.bookingSlot.split(' - ')[0],
+              status: 'Confirmed'
+            });
+            showToast('Consultation appointment confirmed.', 'success');
+            state.bookingMode = 'mybookings';
+            render();
+          });
+        }
+        const walkInBtn = document.getElementById('claim-walkin-btn');
+        if (walkInBtn) {
+          walkInBtn.addEventListener('click', () => {
+            state.walkInWaiting += 1;
+            state.bookings.unshift({ id: `WK-0${20 + state.bookings.length}`, office: 'OSAS Prefect Office', nature: 'Walk-In Queue Pass', date: '2026-11-17', time: 'Live Queue', status: 'Confirmed' });
+            showToast('Walk-in queue ticket claimed.', 'success');
+            state.bookingMode = 'mybookings';
+            render();
+          });
+        }
+
+        const chatSearch = document.getElementById('chat-search-input');
+        if (chatSearch) chatSearch.addEventListener('input', e => { state.chatSearch = e.target.value; render(); });
+        document.querySelectorAll('[data-cfilter]').forEach(btn => { btn.addEventListener('click', () => { state.chatFilter = btn.dataset.cfilter; render(); }); });
+        document.querySelectorAll('[data-chat-id]').forEach(btn => { btn.addEventListener('click', () => { state.activeChatId = btn.dataset.chatId; render(); }); });
+        const toggleDossier = document.getElementById('toggle-dossier-btn');
+        if (toggleDossier) toggleDossier.addEventListener('click', () => { state.showDossier = !state.showDossier; render(); });
+        const chatForm = document.getElementById('chat-send-form');
+        if (chatForm) {
+          chatForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const inp = document.getElementById('chat-input');
+            const text = inp.value.trim();
+            if (!text) return;
+            const chat = state.chats.find(c => c.id === state.activeChatId);
+            if (chat) {
+              chat.messages.push({ from: state.role === 'student' ? 'student' : 'officer', text, time: 'Just now' });
+              chat.preview = text;
+              chat.time = 'Just now';
+            }
+            render();
+          });
+        }
+
+        const regSearch = document.getElementById('reg-search');
+        if (regSearch) regSearch.addEventListener('input', e => { state.registrySearch = e.target.value; render(); });
+        const regInst = document.getElementById('reg-inst');
+        if (regInst) regInst.addEventListener('change', e => { state.registryInstitute = e.target.value; render(); });
+        const regStatus = document.getElementById('reg-status');
+        if (regStatus) regStatus.addEventListener('change', e => { state.registryStatus = e.target.value; render(); });
+        const regReset = document.getElementById('reg-reset');
+        if (regReset) regReset.addEventListener('click', () => { state.registrySearch = ''; state.registryInstitute = 'All'; state.registryStatus = 'All'; render(); });
+        document.querySelectorAll('[data-reveal]').forEach(btn => {
+          btn.addEventListener('click', () => { state.revealedDockets[btn.dataset.reveal] = !state.revealedDockets[btn.dataset.reveal]; render(); });
+        });
+        document.querySelectorAll('[data-resolve]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const c = state.cases.find(x => x.docket === btn.dataset.resolve);
+            if (c) { c.status = 'Resolved'; showToast(`Docket ${c.docket} marked Resolved.`, 'success'); render(); }
+          });
+        });
+
+        const verifyForm = document.getElementById('verify-form');
+        if (verifyForm) {
+          verifyForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const q = document.getElementById('verify-input').value.trim();
+            state.clearanceQuery = q;
+            state.clearanceResult = state.testRecords[q] || { name: `Student ${q || 'Unknown'}`, standing: 'Exemplary', cleared: true, docket: 'None', note: 'No active holds found in registry.' };
+            render();
+          });
+        }
+        document.querySelectorAll('[data-test-id]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const id = btn.dataset.testId;
+            state.clearanceQuery = id;
+            state.clearanceResult = state.testRecords[id];
+            render();
+          });
+        });
+
+        const nextTicket = document.getElementById('next-ticket-btn');
+        if (nextTicket) {
+          nextTicket.addEventListener('click', () => {
+            state.walkInServing += 1;
+            if (state.walkInWaiting > 0) state.walkInWaiting -= 1;
+            showToast(`Now serving WALK-IN #W-0${state.walkInServing}`, 'info');
+            render();
+          });
+        }
+      }
+
+      document.getElementById('open-sidebar-btn').addEventListener('click', () => toggleSidebar(true));
+      document.getElementById('close-sidebar-btn').addEventListener('click', () => toggleSidebar(false));
+      document.getElementById('sidebar-backdrop').addEventListener('click', () => toggleSidebar(false));
+      document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+      document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id === 'modal-overlay') closeModal(); });
+      document.getElementById('switch-student-btn').addEventListener('click', () => { state.role = 'student'; state.view = 'home'; toggleSidebar(false); render(); });
+      document.getElementById('switch-prefect-btn').addEventListener('click', () => { state.role = 'prefect'; state.view = 'overview'; toggleSidebar(false); render(); });
+      document.getElementById('role-toggle-pill').addEventListener('click', () => {
+        state.role = state.role === 'student' ? 'prefect' : 'student';
+        state.view = state.role === 'student' ? 'home' : 'overview';
+        render();
+      });
+      document.getElementById('back-to-home-btn').addEventListener('click', () => {
+        state.view = state.role === 'student' ? 'home' : 'overview';
+        render();
+      });
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        showToast('Session locked. Switch portal view or continue testing.', 'info');
+      });
+      document.getElementById('notif-btn').addEventListener('click', () => { document.getElementById('notif-dropdown').classList.toggle('hidden'); });
+      document.getElementById('clear-notifs-btn').addEventListener('click', () => { state.notifRead = true; document.getElementById('notif-dropdown').classList.add('hidden'); renderChrome(); });
+      document.getElementById('topbar-utility-btn').addEventListener('click', () => {
+        if (state.role === 'student') {
+          openModal('Quick Help & Emergency Support', `<div class="space-y-2.5 text-xs"><div class="p-3 rounded-xl bg-[#F1F5F9]"><strong>OSAS Prefect Desk:</strong> Admin Wing Rm 102</div><div class="p-3 rounded-xl bg-[#F1F5F9]"><strong>CGCC Counseling:</strong> CGCC Room 201 • Mon–Fri 8:00 AM–5:00 PM</div></div>`);
+        } else {
+          openModal('Prefect Desk Audit Log', `<div class="space-y-2 text-xs"><div class="p-2.5 rounded-xl bg-[#F1F5F9]"><strong>09:20 AM</strong> — Officer ErNiel logged evidence for #CDM-2024-002</div><div class="p-2.5 rounded-xl bg-[#F1F5F9]"><strong>06:09 AM</strong> — Automated clearance verified for 2023-01842-CM-0</div></div>`);
+        }
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

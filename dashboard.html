@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="SafeTrack - Colegio de Montalban Offline-First Disciplinary Incident & Grievance Tracking System">
+  <meta name="theme-color" content="#06241c">
+  <title>SafeTrack | Colegio de Montalban - Student Discipline & Welfare</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assetssafetrack-logo.png">
+  <link rel="apple-touch-icon" href="assetssafetrack-logo.png">
+
+  <!-- PWA Web App Manifest -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="manifest.webmanifest">
+
+  <!-- Tailwind CSS Compiled Production Stylesheet -->
+  <link rel="stylesheet" href="tailwind.min.css">
+
+  <!-- Modern Sans-Serif Typography Only (Zero Serif Inheritance) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <script>
+    // Synchronous session guard & theme hydration
+    (function () {
+      try {
+        var sess = sessionStorage.getItem('safetrack_active_session') || localStorage.getItem('safetrack_active_session');
+        var tok = sessionStorage.getItem('safetrack_auth_token') || localStorage.getItem('safetrack_auth_token');
+        if (!sess || !tok) {
+          window.location.replace('./index.html');
+          return;
+        }
+        if (!sessionStorage.getItem('safetrack_active_session')) {
+          sessionStorage.setItem('safetrack_active_session', sess);
+        }
+        if (!sessionStorage.getItem('safetrack_auth_token')) {
+          sessionStorage.setItem('safetrack_auth_token', tok);
+        }
+        var savedTheme = localStorage.getItem('safetrack_app_theme') || localStorage.getItem('safetrack_chat_theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      } catch (e) {
+        window.location.replace('./index.html');
+      }
+    })();
+  </script>
+
+  <!-- SafeTrack Unified Dashboard Design System & Component Styles -->
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body class="font-sans antialiased">
+
+  <!-- HCI Notification Toast Container -->
+  <div id="safetrack-toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2.5 pointer-events-none max-w-sm w-full"></div>
+
+  <div id="drawer-backdrop" onclick="toggleNavDrawer(false)" class="fixed inset-0 z-40 bg-black/70 backdrop-blur-xs hidden transition-opacity cursor-pointer"></div>
+
+  <aside id="nav-drawer"
+    class="fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#2563EB] text-white shadow-2xl flex flex-col justify-between transform -translate-x-full transition-transform duration-300 ease-in-out font-sans"
+    style="top: 0 !important; bottom: 0 !important; left: 0 !important; height: 100vh !important; min-height: 100vh !important; max-height: 100vh !important;">
+    <!-- Drawer Top (Takes available height and scrolls if necessary) -->
+    <div class="p-6 flex-1 overflow-y-auto">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-5 border-b border-[#16233b] gap-2">
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <img src="assets/safetrack-logo.png" alt="SafeTrack Logo" class="w-8 h-8 rounded-full object-cover shrink-0">
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-col items-start gap-1 w-full drawer-brand-header-wrap">
+              <span class="font-bold text-sm tracking-wide text-white whitespace-nowrap shrink-0 drawer-brand-title">SafeTrack</span>
+              <span id="role-badge-sidebar-top" class="text-[10px] px-2 py-0.5 rounded border border-white/10 bg-white/5 text-[#00D4B6] font-mono shrink-0 whitespace-nowrap">Student Space</span>
+            </div>
+            <p class="text-[10px] text-slate-400 truncate mt-0.5">Institutional Portal Menu</p>
+          </div>
+        </div>
+        <button id="btn-close-drawer" onclick="toggleNavDrawer(false)"
+          class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
+          title="Close Menu">
+          <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Appearance Theme Toggle (Dark & Light Mode) -->
+      <div class="mt-4 pb-4 border-b border-[#16233b] drawer-theme-section">
+        <div class="flex items-center justify-between mb-2 px-1 whitespace-nowrap">
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">Interface Theme</span>
+          <span id="drawer-theme-badge"
+            class="text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-700 bg-slate-900 text-emerald-400 font-mono shrink-0 whitespace-nowrap">Dark Mode</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 bg-[#070d1a] p-1 rounded-xl border border-[#1e293b] drawer-theme-switcher">
+          <button type="button" id="drawer-theme-btn-light" onclick="setAppTheme('light')"
+            class="py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer text-slate-400 hover:text-white whitespace-nowrap"
+            title="Switch to Daylight Light Mode">
+            <span class="text-sm shrink-0">☀️</span>
+            <span class="whitespace-nowrap">Light</span>
+          </button>
+          <button type="button" id="drawer-theme-btn-dark" onclick="setAppTheme('dark')"
+            class="py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer bg-[#2563eb] text-white shadow-sm border border-blue-500 whitespace-nowrap"
+            title="Switch to Midnight Dark Mode">
+            <span class="text-sm shrink-0">🌙</span>
+            <span class="whitespace-nowrap">Dark</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav id="drawer-nav-links" class="mt-4 space-y-1">
+        <!-- Links dynamically populated according to active role in app.js -->
+      </nav>
+
+      <!-- Institutional Policy Shortcuts -->
+      <div class="mt-6 pt-5 border-t border-[#16233b]">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 px-3">Institutional Policy
+          Documents</div>
+        <div class="space-y-1">
+          <button id="btn-policy-handbook"
+            class="w-full text-left px-3 py-2.5 rounded-xl text-xs text-[#E2E8F0] hover:text-white hover:bg-white/10 transition flex items-center gap-2.5 cursor-pointer font-medium">
+            <svg class="size-4 text-[#635BFF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
+              <path d="M6 6h10M6 10h10" />
+            </svg>
+            <span>Student Handbook &amp; BI Policy</span>
+          </button>
+          <button id="btn-policy-antibullying"
+            class="w-full text-left px-3 py-2.5 rounded-xl text-xs text-[#E2E8F0] hover:text-white hover:bg-white/10 transition flex items-center gap-2.5 cursor-pointer font-medium">
+            <svg class="size-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <span>Anti-Bullying Act (RA 10627)</span>
+          </button>
+          <button id="btn-policy-cgcc"
+            class="w-full text-left px-3 py-2.5 rounded-xl text-xs text-[#E2E8F0] hover:text-white hover:bg-white/10 transition flex items-center gap-2.5 cursor-pointer font-medium">
+            <svg class="size-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            </svg>
+            <span>CGCC Guidance Services</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portal View / Account Switcher (Minimal Aesthetic Redesign) -->
+    <div class="px-6 py-3 border-t border-white/10 bg-[#0A2540] space-y-2 shrink-0 portal-view-section">
+      <div class="flex items-center justify-between px-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Portal View</span>
+        <span id="role-badge-sidebar" class="text-[10px] font-semibold text-[#00D4B6] uppercase tracking-wider font-mono">Student Space</span>
+      </div>
+      <div class="grid grid-cols-2 gap-1 bg-black/30 p-1 rounded-xl border border-white/10 portal-view-switcher">
+        <button type="button" id="switch-student-btn" onclick="switchActivePortalRole('student'); toggleNavDrawer(false);"
+          class="portal-view-btn active px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer text-center bg-[#635BFF] text-white shadow-xs">Student</button>
+        <button type="button" id="switch-prefect-btn" onclick="switchActivePortalRole('admin'); toggleNavDrawer(false);"
+          class="portal-view-btn px-2 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer text-center text-[#E2E8F0] hover:text-white hover:bg-white/10">Prefect</button>
+      </div>
+    </div>
+
+    <!-- Drawer Footer (Anchored flush to bottom) -->
+    <div class="p-6 border-t border-[#16233b] bg-[#070d1a] shrink-0">
+      <div class="flex items-center gap-2.5 mb-3">
+        <div
+          class="size-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-white"
+          id="drawer-user-avatar">
+          👤
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="text-xs font-bold text-white truncate" id="drawer-user-name">SafeTrack User</div>
+          <div class="text-[10px] text-slate-400 font-mono truncate" id="drawer-user-role">Student Portal</div>
+        </div>
+      </div>
+      <button id="btn-drawer-logout" onclick="handleLogout()"
+        class="w-full py-2 px-3 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 text-xs font-semibold flex items-center justify-center gap-2 transition cursor-pointer">
+        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+        <span>Sign Out / Switch Persona</span>
+      </button>
+    </div>
+  </aside>
+
+
+  <!-- ======================================================== -->
+  <!-- POLICY SHORTCUT MODALS                                   -->
+  <!-- ======================================================== -->
+  <div id="modal-policy"
+    class="fixed inset-0 z-50 bg-[#0A2540]/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div
+      class="bg-white border border-[#E3E8EE] text-[#0A2540] rounded-2xl max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative flex flex-col max-h-[90vh]">
+      <button id="btn-close-policy-modal"
+        class="absolute top-4 right-4 text-slate-400 hover:text-[#0A2540] p-2 rounded-lg cursor-pointer transition">✕</button>
+      <div class="flex items-center gap-2.5 mb-2 text-[#635BFF]">
+        <span id="policy-modal-icon" class="text-xl">📜</span>
+        <span class="text-xs font-bold uppercase tracking-wider text-[#475569]">Institutional Policy Reference &amp; Legal Framework</span>
+      </div>
+      <h3 id="policy-modal-title" class="text-xl font-bold text-[#0A2540] mb-3">Policy Title</h3>
+
+      <!-- Instant Search Filter Bar (for Handbook) -->
+      <div id="handbook-search-container" class="hidden mb-3">
+        <div class="relative">
+          <input type="text" id="handbook-search-input" oninput="filterHandbookOffenses(this.value)" placeholder="Search 57 offenses or penalties (e.g. AI, cyberbullying, recording, uniform, suspension)..." style="padding-left: 42px !important;" class="w-full pl-11 pr-4 py-2.5 text-xs text-[#0A2540] bg-[#EEF3F8] border border-[#E3E8EE] rounded-xl focus:bg-white focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition">
+          <span class="absolute left-3 top-3 text-slate-400 text-xs">🔍</span>
+        </div>
+        <div id="handbook-filter-count" class="text-[11px] text-[#475569] font-medium mt-1.5 px-1">Showing all 57 offenses</div>
+      </div>
+
+      <div id="policy-modal-body"
+        class="text-xs leading-relaxed text-[#475569] space-y-4 max-h-[62vh] overflow-y-auto pr-2">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="mt-4 pt-4 border-t border-[#E3E8EE] flex justify-end">
+        <button id="btn-policy-modal-ok"
+          class="px-6 py-2.5 rounded-xl bg-[#635BFF] hover:bg-[#533AFD] text-white text-xs font-semibold shadow-sm transition cursor-pointer">Understood</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- ======================================================== -->
+  <!-- SCREEN 3: STUDENT DESK                                   -->
+  <!-- ======================================================== -->
+  <section id="screen-student"
+    class="app-screen min-h-screen w-full bg-[#F8FAFC] text-[#0F172A] font-sans antialiased selection:bg-blue-600 selection:text-white flex flex-col hidden">
+
+    <!-- Top Navbar -->
+    <header
+      class="h-14 sm:h-16 px-3 sm:px-6 bg-white/90 backdrop-blur-md border-b border-slate-200/70 flex items-center justify-between sticky top-0 z-30 w-full">
+      <div class="max-w-7xl mx-auto w-full flex items-center justify-between gap-2 sm:gap-3">
+
+        <!-- Left Cluster: Hamburger + Logo + Badge -->
+        <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
+          <!-- Back to Home Button -->
+          <button id="btn-back-home-student"
+            onclick="typeof switchStudentTab === 'function' ? switchStudentTab('home') : (window.location.hash = '#home')"
+            class="hidden p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors cursor-pointer shrink-0"
+            title="Back to Home"
+            aria-label="Back to Home"
+            style="display: none !important;">
+            <svg class="size-4 sm:size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </button>
+          <button id="btn-hamburger-student"
+            class="p-1.5 sm:p-2 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors cursor-pointer flex items-center justify-center shrink-0"
+            title="Toggle Navigation Drawer"
+            aria-label="Open menu">
+            <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+
+          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
+            <img src="assets/safetrack-logo.png" alt="SafeTrack Logo" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover shrink-0">
+            <div class="min-w-0 flex items-center gap-2 shrink-0">
+              <span class="text-sm sm:text-base font-bold text-[#0F172A] tracking-tight truncate shrink-0">SafeTrack</span>
+              <span
+                class="hidden md:inline-flex px-2 py-0.5 rounded-md bg-[#F1F5F9] font-mono text-[10px] font-semibold text-[#64748B] tracking-wider uppercase shrink-0">STUDENT SPACE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Cluster: Quick Help + Notifications + User ID + Online Status + Prefect View + Log Out -->
+        <div class="flex items-center gap-2 shrink-0 header-right-cluster">
+          <!-- 🆘 Quick Help Trigger Button -->
+          <button id="btn-quick-help-nav" onclick="openQuickHelpModal()"
+            class="header-btn-quick-help flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium border border-rose-200/80 bg-rose-50/70 hover:bg-rose-100 text-rose-600 transition-colors whitespace-nowrap shrink-0"
+            title="Immediate Student Quick Help &amp; Welfare Desk (Alt+Q)">
+            <span class="text-xs shrink-0">🆘</span>
+            <span class="hidden md:inline">Quick Help</span>
+          </button>
+
+          <!-- 🔔 System Notifications Bell -->
+          <div class="relative shrink-0">
+            <button id="btn-notifications-student" onclick="toggleNotificationDropdown('student', event)"
+              class="header-bell-btn cursor-pointer relative w-8 h-8 rounded-full border border-slate-200/80 bg-white text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors shrink-0"
+              title="System Notifications"
+              aria-label="Notifications">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span id="badge-notifications-student"
+                class="header-bell-badge absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2563EB] text-white text-[9px] font-bold flex items-center justify-center">0</span>
+            </button>
+            <div id="dropdown-notifications-student" class="hidden absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/80 shadow-lg p-3 z-50 font-sans text-[#0F172A] text-left" style="display: none;">
+              <!-- Dynamically populated by app.js -->
+            </div>
+          </div>
+
+          <div class="header-id-pill hidden md:flex items-center px-3 py-1.5 rounded-full border border-slate-200/80 bg-[#F1F5F9]/60 text-xs text-[#64748B] whitespace-nowrap shrink-0">
+            ID: <span id="student-header-id" class="font-semibold text-[#0F172A] ml-1 tabular-nums">2023-01842-CM-0</span>
+          </div>
+
+          <div id="network-badge-student" class="hidden lg:inline-flex shrink-0">
+            <span class="network-pwa-badge inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50/80 text-emerald-700 border border-emerald-200/60 text-xs font-medium whitespace-nowrap shrink-0">
+              <span class="network-pwa-dot w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+              Online (PWA Ready)
+            </span>
+          </div>
+
+          <!-- Role/Account Toggle Pill (Minimal Aesthetic) -->
+          <button id="role-toggle-pill-student" onclick="switchActivePortalRole('admin')"
+            class="role-toggle-pill hidden md:inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-slate-200/80 bg-white hover:bg-[#F1F5F9] text-xs font-medium text-[#0F172A] transition-colors whitespace-nowrap shrink-0"
+            title="Switch to Prefect Desk View">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#06B6D4] shrink-0"></span>
+            <span class="font-semibold">Prefect View</span>
+          </button>
+
+          <button id="btn-install-student"
+            class="hidden h-9 px-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-[#0F172A] text-xs font-medium cursor-pointer transition items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Install App
+          </button>
+
+          <button id="btn-student-logout" onclick="handleLogout()"
+            class="header-btn-logout inline-flex items-center justify-center gap-1 w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 rounded-full border border-rose-200/80 bg-rose-50/70 hover:bg-rose-100 text-rose-600 text-xs font-medium transition-colors whitespace-nowrap shrink-0"
+            title="Sign out of student portal">
+            <svg class="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Student Horizontal Tabs Navigation Bar -->
+    <div id="student-secondary-nav-wrapper" class="w-full bg-white sm:bg-transparent border-b border-slate-200/70 sm:border-0 student-secondary-nav">
+      <div class="max-w-5xl mx-auto pt-6 pb-2 px-4">
+        <div class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-4 border-b border-slate-200/70 student-tabs-nav-bar">
+          <button id="student-tab-home"
+            class="px-4 py-2 rounded-full bg-[#2563EB] text-white text-xs sm:text-[13px] font-semibold shadow-sm inline-flex justify-center items-center gap-2 transition-colors cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Home
+          </button>
+
+          <button id="student-tab-form"
+            class="px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors inline-flex justify-center items-center gap-2 cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+            Submit Incident
+          </button>
+
+          <button id="student-tab-tickets"
+            class="px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors inline-flex justify-center items-center gap-2 cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            My Submitted Tickets
+          </button>
+
+          <button id="student-tab-clearance"
+            class="px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors inline-flex justify-center items-center gap-2 cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Clearance Status
+          </button>
+
+          <button id="student-tab-appointments" onclick="switchStudentTab('appointments')"
+            class="px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors inline-flex justify-center items-center gap-2 cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>Book Consultation</span>
+          </button>
+
+          <button id="student-tab-messages"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors cursor-pointer shrink-0">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span>OSAS Chat</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Main Viewport -->
+    <main class="dashboard-main-content flex-1 px-4 sm:px-6 pt-5 pb-14 max-w-5xl w-full mx-auto space-y-6 font-sans bg-transparent min-h-[calc(100vh-64px)] text-white">
+
+      <!-- ======================================================== -->
+      <!-- MODULE 3: DEDICATED STUDENT "HOME" HUB (#student-view-home)-->
+      <!-- ======================================================== -->
+      <div id="student-view-home" class="block space-y-6">
+
+        <!-- Welcome Hero Banner -->
+        <section class="student-hero-banner rounded-2xl bg-[#0F172A] text-white p-7 sm:p-10 relative overflow-hidden" style="background-color: #0F172A !important; color: #FFFFFF !important;">
+          <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-[#2563EB]/20 blur-3xl pointer-events-none" style="background-color: rgba(37, 99, 235, 0.2) !important;"></div>
+          <div class="relative max-w-2xl space-y-4">
+            <div class="hero-badge-row flex flex-wrap items-center gap-2">
+              <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase" style="background-color: #FFFFFF !important; color: #0F172A !important;">COLEGIO DE MONTALBAN • STUDENT SAFE SPACE</span>
+              <span class="px-3 py-1 rounded-full bg-white/10 text-white/85 text-[11px] font-mono tabular-nums border border-white/20" id="home-student-badge" style="background-color: rgba(255, 255, 255, 0.1) !important; color: #FFFFFF !important;">2023-01842-CM-0</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight" style="color: #FFFFFF !important;">Welcome back, Montalbano</h1>
+            <p class="text-sm font-medium text-[#06B6D4]" style="color: #06B6D4 !important;">A Safe, Respectful Campus Space Built for You.</p>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-xl" style="color: #CBD5E1 !important;">
+              SafeTrack provides an encrypted, confidential avenue for students to report grievances, request assistance from the Prefect Desk, and resolve conflicts peacefully.
+            </p>
+            <div class="hero-cta-row flex flex-wrap gap-3 pt-2">
+              <button onclick="switchStudentTab('form')" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-semibold transition-colors shadow-sm cursor-pointer whitespace-nowrap" style="background-color: #2563EB !important; color: #FFFFFF !important;">
+                <span>File Incident Report</span>
+                <span>→</span>
+              </button>
+              <button onclick="switchStudentTab('clearance')" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-[#F1F5F9] text-[#0F172A] text-xs sm:text-sm font-semibold transition-colors cursor-pointer border border-slate-200/80 whitespace-nowrap">
+                <span>View Disciplinary Clearance</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3 Quick-Action Interactive Cards (Exact safetrack_minimal_aesthetic_redesign.html Blueprint) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+
+          <!-- Quick Action 1: Incident Reporting -->
+          <div class="quick-action-card bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5 shadow-sm hover:border-slate-300 transition-colors">
+            <div class="space-y-3">
+              <div class="feature-icon-badge w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-[#0F172A]">Report an Incident or Bullying</h3>
+              <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">100% confidential intake protected under CdM Student Privacy Policy.</p>
+            </div>
+            <button onclick="switchStudentTab('form')"
+              class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors shadow-sm cursor-pointer whitespace-nowrap inline-flex items-center justify-center gap-2" style="background-color: #2563EB !important; color: #FFFFFF !important;">
+              <span>File Report</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <!-- Quick Action 2: Clearance Status -->
+          <div class="quick-action-card bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5 shadow-sm hover:border-slate-300 transition-colors">
+            <div class="space-y-3">
+              <div class="feature-icon-badge w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-[#0F172A]">Discipline Clearance Status</h3>
+              <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">Instant verification of active sanctions and Good Moral certificate readiness.</p>
+            </div>
+            <button onclick="switchStudentTab('clearance')"
+              class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors shadow-sm cursor-pointer whitespace-nowrap inline-flex items-center justify-center gap-2" style="background-color: #2563EB !important; color: #FFFFFF !important;">
+              <span>Check Clearance</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <!-- Quick Action 3: OSAS Chat -->
+          <div class="quick-action-card bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5 shadow-sm hover:border-slate-300 transition-colors">
+            <div class="space-y-3">
+              <div class="feature-icon-badge w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-[#0F172A]">OSAS Chat &amp; Consultation</h3>
+              <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">Direct, private messaging channel with designated Prefect officers.</p>
+            </div>
+            <button onclick="switchStudentTab('messages')"
+              class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors shadow-sm cursor-pointer whitespace-nowrap inline-flex items-center justify-center gap-2" style="background-color: #2563EB !important; color: #FFFFFF !important;">
+              <span>Open Chat</span>
+              <span>→</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="student-view-form" class="hidden w-full max-w-5xl mx-auto font-sans">
+
+        <!-- Main Card Wrapper -->
+        <div class="bg-white rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-900/5 overflow-hidden">
+
+          <!-- Institutional Header (SafeTrack Midnight Navy & Royal Blue) -->
+          <div class="student-hero-banner w-full bg-[#0F172A] border-b border-slate-200/20 text-white p-7 sm:p-9 relative overflow-hidden" style="background-color: #0F172A !important; color: #FFFFFF !important;">
+
+            <!-- Ambient Accent -->
+            <div
+              class="absolute -right-10 -bottom-10 size-48 rounded-full bg-blue-600/20 blur-2xl pointer-events-none"
+              style="width: 14rem; height: 14rem; background-color: rgba(37, 99, 235, 0.2); filter: blur(40px);">
+            </div>
+
+            <!-- Top Meta Row -->
+            <div class="flex flex-wrap items-center justify-between gap-2.5 mb-4 relative z-10">
+              <span
+                class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-white/10 text-[#06B6D4]">
+                <svg class="size-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2">
+                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <span>Zero-Knowledge Protected Portal</span>
+              </span>
+              <span class="form-meta-id text-xs font-mono font-medium text-slate-400">Form ID: CDM-IR-2026</span>
+            </div>
+
+            <!-- Heading & Legal Citation -->
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2 leading-tight relative z-10" style="color: #FFFFFF !important;">
+              Report a Concern, Bullying, or Violation
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed relative z-10" style="color: #CBD5E1 !important;">
+              Protected under Republic Act 10627 (Anti-Bullying Act) and Republic Act 10173 (Data Privacy Act of 2012).
+            </p>
+          </div>
+
+          <!-- Form Body Container -->
+          <div class="p-6 sm:p-8 bg-white dark:bg-[#0F172A] border-t border-slate-100 dark:border-slate-800 space-y-6">
+
+            <!-- Success Notification Alert -->
+            <div id="student-form-success"
+              class="hidden bg-blue-50 text-blue-900 border border-blue-200 rounded-xl p-4 text-xs font-semibold mb-6">
+            </div>
+
+            <form id="student-complaint-form">
+
+              <!-- =================================================== -->
+              <!-- SECTION 1: REPORTING IDENTITY MODE                  -->
+              <!-- =================================================== -->
+              <div class="mb-8">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3 block">
+                  1. REPORTING IDENTITY MODE
+                </label>
+
+                <!-- 2-Column Responsive Card Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+                  <!-- Mode Card 1: 100% Anonymous Mode -->
+                  <label id="card-mode-anonymous"
+                    class="p-4 rounded-2xl border-2 border-blue-500 bg-blue-50/50 cursor-pointer transition flex items-start gap-3 shadow-xs">
+                    <input type="radio" name="identity-mode" id="mode-anonymous" value="anonymous" checked
+                      class="size-4 mt-0.5 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer">
+                    <div class="min-w-0 flex-1">
+                      <div class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <span>100% Anonymous Mode</span>
+                        <span>🏛️</span>
+                      </div>
+                      <div class="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                        Zero student PII or credentials recorded publicly.
+                      </div>
+                    </div>
+                  </label>
+
+                  <!-- Mode Card 2: Verified Student Mode -->
+                  <label id="card-mode-verified"
+                    class="p-4 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 cursor-pointer transition flex items-start gap-3">
+                    <input type="radio" name="identity-mode" id="mode-verified" value="verified"
+                      class="size-4 mt-0.5 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer">
+                    <div class="min-w-0 flex-1">
+                      <div class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <span>Verified Student Mode</span>
+                        <span>🪪</span>
+                      </div>
+                      <div class="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                        Provide Student ID for official administrative callback.
+                      </div>
+                    </div>
+                  </label>
+
+                </div>
+
+                <!-- Privacy Notice Callout Box (Accessible Contrast WCAG AA) -->
+                <div
+                  class="safetrack-callout-box p-4 rounded-xl flex items-center gap-3 text-xs">
+                  <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <path d="m9 12 2 2 4-4" />
+                  </svg>
+                  <span class="leading-relaxed">
+                    Your identity is protected under CdM Student Privacy Policy. The Prefect sees confirmed validation
+                    without public exposure.
+                  </span>
+                </div>
+
+                <!-- Hidden helper checkbox for backwards-compatible state tracking -->
+                <input type="checkbox" id="student-check-anonymous" checked class="hidden">
+              </div>
+
+              <!-- Complainant / Reporting Officer Name (Shown dynamically when in Verified Mode) -->
+              <div id="student-complainant-wrapper"
+                class="hidden bg-slate-50/60 border border-slate-300 rounded-2xl p-4 mb-6 transition">
+                <label class="block text-xs font-bold text-slate-700 mb-1.5" for="student-input-complainant">
+                  Complainant / Reporting Officer or Student Name
+                </label>
+                <input type="text" id="student-input-complainant"
+                  placeholder="e.g. Maria Santos (or leave blank if filing anonymously)"
+                  class="w-full h-11 px-4 text-xs text-slate-800 bg-white border border-slate-300 rounded-xl focus:bg-white focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition">
+                <span class="text-[10px] text-slate-500 mt-1 block">Left blank will register as 'Undisclosed
+                  Complainant'.</span>
+              </div>
+
+              <!-- =================================================== -->
+              <!-- SECTION 2: INVOLVED PARTIES                         -->
+              <!-- =================================================== -->
+              <div class="mb-6">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3 block">
+                  2. INVOLVED PARTIES
+                </label>
+
+                <!-- 2-Column Responsive Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <!-- Column 1: Involved Student Number -->
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="student-input-student-number">
+                      Involved Student Number *
+                    </label>
+                    <input type="text" id="student-input-student-number" required placeholder="e.g. 2023-01842-CM-0"
+                      class="w-full h-11 px-4 text-xs font-mono text-slate-800 bg-slate-50/60 border border-slate-300 rounded-xl focus:bg-white focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition">
+                    <span class="text-[10px] text-slate-400 mt-1 block">Format: YYYY-XXXXX-CM-0</span>
+                  </div>
+
+                  <!-- Column 2: Involved Student Full Name -->
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="student-input-student-name">
+                      Involved Student Full Name *
+                    </label>
+                    <input type="text" id="student-input-student-name" required placeholder="e.g. Juan De La Cruz"
+                      class="w-full h-11 px-4 text-xs text-slate-800 bg-slate-50/60 border border-slate-300 rounded-xl focus:bg-white focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition">
+                  </div>
+                </div>
+              </div>
+
+              <!-- =================================================== -->
+              <!-- SECTION 3: INCIDENT DETAILS & CLASSIFICATION        -->
+              <!-- =================================================== -->
+              <div class="mb-6">
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3 block">
+                  3. INCIDENT CLASSIFICATION & LOCATION
+                </label>
+
+                <!-- 2-Column Responsive Grid: Classification & Institute -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                  <!-- Column 1: Incident Classification -->
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="student-select-classification">
+                      Incident Classification *
+                    </label>
+                    <select id="student-select-classification" required
+                      class="w-full h-11 px-3 text-xs text-slate-800 bg-slate-50/60 border border-slate-300 rounded-xl focus:bg-white focus:border-[#635BFF] focus:ring-2 focus:ring-[#635BFF]/20 focus:outline-none transition cursor-pointer">
+                      <option value="Article VI, Sec 4.55 — Online Harassment &amp; Cyberbullying">Article VI, Sec 4.55 — Online Harassment &amp; Cyberbullying</option>
+                      <option value="Article VI, Sec 4.56 — AI Tool Misuse &amp; Generative Academic Fraud">Article VI, Sec 4.56 — AI Tool Misuse &amp; Generative Academic Fraud</option>
+                      <option value="Article VI, Sec 4.54 — Unauthorized Class Recording">Article VI, Sec 4.54 — Unauthorized Class Recording</option>
+                      <option value="Article VI, Sec 4.57 — Unauthorized Financial Solicitation">Article VI, Sec 4.57 — Unauthorized Financial Solicitation</option>
+                      <option value="Article VI, Sec 4.10 — Non-wearing / Improper Uniform &amp; ID Card">Article VI, Sec 4.10 — Non-wearing / Improper Uniform &amp; ID Card</option>
+                      <option value="Article VI, Sec 4.9 — Attire, Grooming &amp; Piercings Non-compliance">Article VI, Sec 4.9 — Attire, Grooming &amp; Piercings Non-compliance</option>
+                      <option value="Article VI, Sec 4.5 — Campus Disturbance &amp; Noise Commotion">Article VI, Sec 4.5 — Campus Disturbance &amp; Noise Commotion</option>
+                      <option value="Article VI, Sec 4.36 — Defacing Property &amp; Vandalism">Article VI, Sec 4.36 — Defacing Property &amp; Vandalism</option>
+                      <option value="Article VI, Sec 4.3 — Smoking / Vaping within Campus">Article VI, Sec 4.3 — Smoking / Vaping within Campus</option>
+                      <option value="Article VI, Sec 4.7 — Possession / Influence of Alcohol">Article VI, Sec 4.7 — Possession / Influence of Alcohol</option>
+                      <option value="Article VI, Sec 4.8 — Gambling &amp; Betting within Campus">Article VI, Sec 4.8 — Gambling &amp; Betting within Campus</option>
+                      <option value="Article VI, Sec 4.39 — Carrying Deadly Weapons">Article VI, Sec 4.39 — Carrying Deadly Weapons</option>
+                      <option value="Article VI, Sec 4.45 — Hazing / Illegal Fraternities &amp; Sororities">Article VI, Sec 4.45 — Hazing / Illegal Fraternities &amp; Sororities</option>
+                      <option value="Article VI, Sec 4.51 — Sexual Harassment">Article VI, Sec 4.51 — Sexual Harassment</option>
+                      <option value="Article VI, Sec 4.53 — Violation of Institutional Code of Conduct">Article VI, Sec 4.53 — Violation of Institutional Code of Conduct</option>
+                    </select>
+                  </div>
+
+                  <!-- Column 2: Academic Institute -->
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="student-select-institute">
+                      Academic Institute *
+                    </label>
+                    <select id="student-select-institute" required
+                      class="w-full h-11 px-3 text-xs text-slate-800 bg-slate-50/60 border border-slate-300 rounded-xl focus:bg-white focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition cursor-pointer">
+                      <option value="ICS">ICS - Institute of Computer Studies</option>
+                      <option value="IEd">IEd - Institute of Education</option>
+                      <option value="IBA">IBA - Institute of Business and Accountancy</option>
+                      <option value="IE">IE - Institute of Engineering</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Sub-Grid: Date/Time + Physical/Digital Location (2-Column) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <!-- Field 1: Incident Date & Approximate Time -->
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="student-input-date">
+                      Incident Date & Approximate Time *
+                    </label>
+                    <input type="datetime-local" id="student-input-date" required
+                      class="w-full h-11 px-4 text-xs text-slate-800 bg-slate-50/60 border border-slate-300 rounded-xl focus:bg-white focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition">
+                  </div>
+
+                  <!-- Field 2: Campus Location or Online Channel -->
+                  <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="student-input-location">
+                      Campus Location or Online Channel *
+                    </label>
+                    <input type="text" id="student-input-location" required
+                      placeholder="e.g. 3F ICS Lab, Canteen, Messenger GC"
+                      class="w-full h-11 px-4 text-xs text-slate-800 bg-slate-50/60 border border-slate-300 rounded-xl focus:bg-white focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition">
+                  </div>
+                </div>
+              </div>
+
+              <!-- =================================================== -->
+              <!-- SECTION 4: NARRATIVE, EVIDENCE & SUBMISSION         -->
+              <!-- =================================================== -->
+              <div>
+                <label class="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3 block">
+                  4. INCIDENT NARRATIVE
+                </label>
+
+                <!-- Textarea Container -->
+                <div>
+                  <div class="flex justify-between items-center mb-1.5">
+                    <label class="text-xs font-bold text-slate-700" for="student-textarea-description">
+                      Detailed Incident Narrative *
+                    </label>
+                    <span class="text-[11px] text-slate-400">Minimum 20 characters</span>
+                  </div>
+                  <textarea id="student-textarea-description" required minlength="20" rows="4"
+                    placeholder="Describe what transpired, persons involved, names of witnesses, and any immediate safety concerns..."
+                    class="w-full p-4 text-xs text-slate-800 bg-slate-50/60 border border-slate-300 rounded-2xl focus:bg-white focus:border-[#2563eb] focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition resize-y min-h-[130px]"></textarea>
+                </div>
+
+                <!-- CGCC Guidance Referral Alert Checkbox (Accessible Contrast WCAG AA) -->
+                <div class="safetrack-checkbox-card p-4 rounded-xl flex items-start gap-3 my-6">
+                  <input type="checkbox" id="student-check-guidance"
+                    class="size-4.5 rounded mt-0.5 border-slate-300 cursor-pointer text-blue-600 focus:ring-blue-500 accent-blue-600">
+                  <div>
+                    <label for="student-check-guidance" class="text-xs font-bold cursor-pointer">
+                      Request priority psychological or counseling intervention with the College Guidance & Counseling
+                      Center (CGCC).
+                    </label>
+                    <p class="text-xs mt-0.5">Flag this incident for restorative behavioral counseling
+                      and psycho-social guidance intervention.</p>
+                  </div>
+                </div>
+
+                <!-- Form Actions (Right-Aligned Button Deck) -->
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3 form-action-buttons-row">
+                  <button type="reset" id="btn-clear-student-form"
+                    class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition cursor-pointer">
+                    Clear Form
+                  </button>
+                  <button type="submit"
+                    class="px-8 py-3 rounded-xl bg-[#2563eb] hover:bg-blue-600 active:scale-[0.99] text-white font-bold text-xs shadow-md shadow-blue-900/30 transition cursor-pointer flex items-center gap-2">
+                    <span>Submit Incident Report</span>
+                    <span>→</span>
+                  </button>
+                </div>
+
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- VIEW 3C: MY SUBMITTED TICKETS                            -->
+      <!-- ======================================================== -->
+      <div id="student-view-tickets" class="hidden">
+        <div class="rounded-2xl overflow-hidden border border-slate-200/70 bg-white shadow-sm">
+          <div class="student-hero-banner bg-[#0F172A] text-white p-7 sm:p-9 relative overflow-hidden" style="background-color: #0F172A !important; color: #FFFFFF !important;">
+            <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-[#2563EB]/20 blur-3xl pointer-events-none"></div>
+            <div class="relative z-10 max-w-2xl">
+              <div class="flex flex-wrap items-center gap-2.5 mb-4">
+                <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase font-mono">
+                  Official OSAS Incident Docket
+                </span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2 leading-tight">My Submitted Tickets</h2>
+              <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">Track real-time status updates and Prefect resolution actions for reports filed on this device.</p>
+            </div>
+          </div>
+
+          <div class="p-6 overflow-x-auto">
+            <table class="w-full border-collapse text-left">
+              <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+                  <th class="px-4 py-3.5">Docket #</th>
+                  <th class="px-4 py-3.5">Classification &amp; Location</th>
+                  <th class="px-4 py-3.5">Involved Student</th>
+                  <th class="py-4 px-5 text-center whitespace-nowrap">Referral</th>
+                  <th class="py-4 px-5 text-center">Live Status</th>
+                  <th class="px-4 py-3.5">Office Resolution Notes</th>
+                </tr>
+              </thead>
+              <tbody id="student-tickets-table-body" class="divide-y divide-slate-100 text-sm">
+                <!-- Populated by app.js -->
+              </tbody>
+            </table>
+
+            <div id="student-tickets-empty" class="hidden p-10 text-center bg-white">
+              <div class="inline-flex items-center justify-center size-12 bg-blue-50 text-blue-600 rounded-2xl mb-3">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+              </div>
+              <div class="font-bold text-[#0F172A] text-base">No Tickets Filed Yet</div>
+              <div class="text-xs text-[#64748B] mt-1.5 max-w-sm mx-auto">Reports you submit through the Student Portal will appear here with live resolution notes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="student-view-clearance" class="hidden">
+        <div class="bg-white border border-slate-200/70 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <h2 class="text-xl font-bold text-[#0F172A]">Good Moral &amp; Disciplinary Clearance Status</h2>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700">Real-Time</span>
+            </div>
+            <p class="text-xs text-[#64748B] mt-1">Official Colegio de Montalban automated verification for graduation, transfer credentials, and Certificate of Good Moral Character.</p>
+          </div>
+
+          <div id="student-clearance-display" class="space-y-4">
+            <!-- Rendered by app.js for active student session -->
+          </div>
+        </div>
+      </div>
+
+      <div id="student-view-appointments" class="hidden space-y-8" style="display: none;">
+        <!-- Hero Header -->
+        <div class="w-full rounded-2xl p-7 sm:p-9 bg-[#0F172A] border border-slate-200/20 text-white relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-8 student-hero-banner">
+          <div class="absolute -right-10 -top-10 size-80 rounded-full bg-blue-600/10 blur-[120px] pointer-events-none"></div>
+          <div class="max-w-2xl flex-1 relative z-10">
+            <div class="flex flex-wrap items-center gap-2.5 mb-4">
+              <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase font-mono">
+                OSAS PREFECT &amp; CGCC GUIDANCE SERVICES
+              </span>
+              <span class="px-3 py-1 rounded-full bg-white/10 text-[#06B6D4] text-[11px] font-medium">
+                Face-to-Face &amp; Digital Queue Active
+              </span>
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2 leading-tight">
+              Consultation Booking &amp; Walk-In Desk
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+              Schedule formal face-to-face appointments with the Prefect of Discipline or College Guidance &amp; Counseling Center (CGCC Room 201), or claim a live digital walk-in ticket.
+            </p>
+          </div>
+        </div>
+
+        <!-- Mode Selector Switcher (HCI Usability Pills) -->
+        <div class="consult-mode-switcher border-b border-slate-100 pb-4 flex flex-wrap gap-3 items-center">
+          <button id="btn-mode-face-to-face" onclick="switchAppointmentMode('scheduled')"
+            class="consult-mode-pill active-mode bg-[#2563eb] text-white shadow-[0_4px_16px_rgba(37,99,235,0.35)]"
+            style="padding: 10px 20px; gap: 8px; border-radius: 9999px; white-space: nowrap; display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.18s ease;">
+            <span>📅</span>
+            <span>Mode A: Scheduled Face-to-Face</span>
+          </button>
+          <button id="btn-mode-walkin" onclick="switchAppointmentMode('walkin')"
+            class="consult-mode-pill bg-white border border-slate-200/80 text-[#64748B] hover:text-[#0F172A]"
+            style="padding: 10px 20px; gap: 8px; border-radius: 9999px; white-space: nowrap; display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.18s ease;">
+            <span>🎫</span>
+            <span>Mode B: Walk-In Queue Pass</span>
+          </button>
+          <button id="btn-mode-my-bookings" onclick="switchAppointmentMode('records')"
+            class="consult-mode-pill bg-white border border-slate-200/80 text-[#64748B] hover:text-[#0F172A] ml-auto"
+            style="padding: 10px 20px; gap: 8px; border-radius: 9999px; white-space: nowrap; display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.18s ease;">
+            <span>📋</span>
+            <span>My Bookings &amp; Tickets</span>
+            <span id="badge-my-appointments-count" class="bg-blue-600/30 text-blue-300 text-[10px] px-2 py-0.5 rounded-full font-mono ml-1">0</span>
+          </button>
+        </div>
+
+        <!-- MODE A: Scheduled Face-to-Face Form -->
+        <div id="pane-appointment-scheduled" class="space-y-6">
+          <div class="consult-step-card bg-white rounded-2xl border border-slate-200/70 p-6 sm:p-8 shadow-sm text-[#0F172A]">
+            <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <span class="size-6 rounded-lg bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-xs">1</span>
+              <span>Select Consultation Office &amp; Category</span>
+            </h3>
+            <p class="text-xs text-slate-400 mb-6">Choose the specific institutional department for your face-to-face consultation.</p>
+
+            <!-- Segmented Control Office Chips (Evenly Spaced, No Overlap, WCAG AA) -->
+            <div class="consult-chip-group mb-6">
+              <div id="card-office-osas" onclick="selectConsultationOffice('OSAS Prefect Desk')"
+                role="button" tabindex="0"
+                class="consult-chip-item selected flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl cursor-pointer transition">
+                <div class="size-10 rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-lg shrink-0">⚖️</div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <span class="font-bold text-white text-sm truncate">OSAS Prefect Office</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/30 text-blue-400">Admin Wing Rm 102</span>
+                      <div class="check-indicator size-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">✓</div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-slate-400 leading-relaxed">Disciplinary case reviews, grievance conciliations, and formal Certificate of Good Moral inquiries.</p>
+                </div>
+              </div>
+
+              <div id="card-office-cgcc" onclick="selectConsultationOffice('College Guidance & Counseling Center (CGCC Room 201)')"
+                role="button" tabindex="0"
+                class="consult-chip-item flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl cursor-pointer transition">
+                <div class="size-10 rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">🤝</div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between gap-2 mb-1">
+                    <span class="font-bold text-white text-sm truncate">CGCC Guidance &amp; Counseling</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">CGCC Room 201</span>
+                      <div class="check-indicator size-5 rounded-full bg-blue-600 text-white hidden items-center justify-center text-[10px] font-bold">✓</div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-slate-400 leading-relaxed">Restorative counseling, emotional wellness support, peer mediation, and stress alleviation consultations.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Consultation Classification -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Consultation Nature / Classification</label>
+                <select id="apt-input-category"
+                  class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                  <option value="Disciplinary Review">Disciplinary Case Inquiry / Preliminary Conference</option>
+                  <option value="Guidance Session">Personal Guidance &amp; Emotional Wellness</option>
+                  <option value="Good Moral Clearance">Certificate of Good Moral Hold Verification</option>
+                  <option value="Peer Dispute Mediation">Peer Conflict Resolution &amp; Amicable Settlement</option>
+                  <option value="General Welfare">Other Student Welfare Consultation</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-2">Preferred Consultation Date</label>
+                <input type="date" id="apt-input-date" onchange="updateTimeSlotAvailability()"
+                  class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              </div>
+            </div>
+
+            <!-- Time Slots Pills (HCI Error Prevention) -->
+            <div class="mb-6">
+              <label class="block text-xs font-semibold text-slate-300 mb-2">
+                Available Consultation Time Slots <span class="text-[11px] font-normal text-slate-400">(Already booked slots are disabled)</span>
+              </label>
+              <div id="apt-slots-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <!-- Dynamically rendered or preset -->
+              </div>
+            </div>
+
+            <!-- Specific Notes (Brief Summary of Concern with Counter & Focus Ring) -->
+            <div class="mb-6">
+              <div class="flex items-center justify-between mb-2">
+                <label for="apt-input-notes" class="block text-xs font-bold text-slate-200">
+                  Brief Summary of Concern <span class="text-slate-400 font-normal">(Confidential to Desk Officer)</span>
+                </label>
+                <span id="apt-notes-counter" class="text-[11px] text-slate-400 font-mono">0 / 300</span>
+              </div>
+              <textarea id="apt-input-notes" rows="3" maxlength="300"
+                oninput="document.getElementById('apt-notes-counter').textContent = this.value.length + ' / 300'"
+                placeholder="Mention any related case docket numbers, course subject, or specific guidance assistance required..."
+                class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl p-3.5 text-xs text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition shadow-inner leading-relaxed"></textarea>
+            </div>
+
+            <!-- Submit Button Deck -->
+            <div class="flex items-center justify-between pt-4 border-t border-[#16233b]">
+              <span class="text-xs text-slate-400">Confirmation notice will be sent to your student notification bell.</span>
+              <button onclick="submitScheduledAppointment()"
+                class="px-6 py-3 rounded-xl bg-[#2563eb] hover:bg-blue-600 text-white text-xs font-bold transition cursor-pointer shadow-[0_4px_16px_rgba(37,99,235,0.4)] flex items-center gap-2">
+                <span>Confirm &amp; Book Appointment</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MODE B: Walk-In Queue Pass -->
+        <div id="pane-appointment-walkin" class="hidden space-y-6" style="display: none;">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Request Pass -->
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200/70 p-6 sm:p-8 shadow-sm text-[#0F172A]">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="size-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <h3 class="text-base font-bold text-white">Claim On-Campus Walk-In Queue Ticket</h3>
+              </div>
+              <p class="text-xs text-slate-400 mb-6">
+                Are you currently on campus? Generate a live digital queue pass for immediate assistance without a prior scheduled booking.
+              </p>
+
+              <div class="space-y-4 mb-6">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-2">Target Office</label>
+                  <select id="walkin-input-office"
+                    class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                    <option value="OSAS Prefect Desk">Office of Student Affairs &amp; Services (Prefect Desk)</option>
+                    <option value="CGCC Room 201">College Guidance &amp; Counseling Center (CGCC Room 201)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 mb-2">Immediate Concern</label>
+                  <input type="text" id="walkin-input-concern" placeholder="e.g. Urgent Clearance Signing / Emergency Guidance..."
+                    class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                </div>
+              </div>
+
+              <button onclick="generateWalkInTicket()"
+                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold transition cursor-pointer shadow-[0_4px_16px_rgba(16,185,129,0.35)] flex items-center justify-center gap-2">
+                <span>🎫 Generate Digital Walk-In Ticket</span>
+              </button>
+            </div>
+
+            <!-- Right: Live Walk-In Pass Display -->
+            <div id="walkin-ticket-active-card" class="bg-[#070d1a] rounded-3xl border border-emerald-500/40 p-6 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+              <div class="absolute -right-8 -top-8 size-40 rounded-full bg-emerald-500/10 blur-[60px] pointer-events-none"></div>
+              <div>
+                <div class="flex items-center justify-between pb-3 border-b border-[#16233b] mb-4">
+                  <span class="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-bold">DIGITAL PASS • LIVE</span>
+                  <span class="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                </div>
+                <div class="text-center py-4">
+                  <span class="text-xs text-slate-400 font-medium">Your Walk-In Ticket</span>
+                  <div id="walkin-ticket-number" class="text-4xl font-black text-white tracking-wider my-2 font-mono">WALK-IN #W-04</div>
+                  <span id="walkin-ticket-status" class="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">Active in Queue</span>
+                </div>
+                <div class="space-y-2.5 text-xs text-[#475569] bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Desk Serving:</span>
+                    <span id="walkin-now-serving" class="font-bold text-blue-400 font-mono">Now Serving #W-02</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Estimated Wait:</span>
+                    <span id="walkin-estimated-wait" class="font-bold text-amber-300">~15 mins</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Assigned Office:</span>
+                    <span id="walkin-assigned-office" class="font-semibold text-white">CGCC Room 201</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pt-4 border-t border-[#16233b] text-center mt-4">
+                <span class="text-[11px] text-slate-500">Please stay near the office waiting area.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MY BOOKINGS LIST PANE -->
+        <div id="pane-appointment-records" class="hidden space-y-4" style="display: none;">
+          <div class="bg-white rounded-2xl border border-slate-200/70 p-6 shadow-sm text-[#0F172A]">
+            <h3 class="text-sm font-bold text-white mb-4 flex items-center justify-between">
+              <span>My Consultation Bookings &amp; Queue History</span>
+              <button onclick="renderStudentAppointments()" class="text-xs text-blue-400 hover:text-blue-300">Refresh ⟳</button>
+            </h3>
+            <div id="student-appointments-list" class="space-y-3">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================== -->
+      <!-- MODULE 6: 2-COLUMN FORMAL INSTITUTIONAL MESSAGING HUB    -->
+      <!-- ======================================================== -->
+      <div id="student-view-messages" class="hidden w-full h-full" style="display: none;">
+        <div id="student-messaging-container" class="hidden w-full h-full" style="display: none;"></div>
+      </div>
+
+    </main>
+
+    <!-- Student Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+      <div
+        class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <div>
+          <span class="font-semibold text-slate-800">Colegio de Montalban</span> • SafeTrack Student Safe Space
+        </div>
+        <span>Prefect of Discipline & Student Affairs</span>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- SCREEN 4: ADMINISTRATOR & PREFECT DASHBOARD              -->
+  <!-- ======================================================== -->
+  <section id="screen-admin"
+    class="app-screen min-h-screen w-full bg-[#F8FAFC] text-[#0F172A] font-sans antialiased selection:bg-blue-600 selection:text-white flex flex-col hidden">
+
+    <!-- Top Navbar -->
+    <header
+      class="h-14 sm:h-16 px-3 sm:px-6 bg-white/90 backdrop-blur-md border-b border-slate-200/70 flex items-center justify-between sticky top-0 z-30 w-full">
+      <div class="max-w-7xl mx-auto w-full flex items-center justify-between gap-2 sm:gap-3">
+
+        <!-- Left Cluster: Hamburger + Logo + Badge -->
+        <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
+          <!-- Back to Home Button (Admin) -->
+          <button id="btn-back-home-admin"
+            onclick="typeof switchAdminTab === 'function' ? switchAdminTab('home') : (window.location.hash = '#home')"
+            class="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors cursor-pointer flex items-center justify-center shrink-0"
+            title="Back to Home"
+            aria-label="Back to Home"
+            style="display: none !important;">
+            <svg class="size-4 sm:size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+          </button>
+          <button id="btn-hamburger-admin"
+            class="p-1.5 sm:p-2 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] transition-colors cursor-pointer flex items-center justify-center shrink-0"
+            title="Toggle Navigation Drawer"
+            aria-label="Open menu">
+            <svg class="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+
+          <div class="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink-0">
+            <img src="assets/safetrack-logo.png" alt="SafeTrack Logo" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover shrink-0">
+            <div class="min-w-0 flex items-center gap-2 shrink-0">
+              <span class="text-sm sm:text-base font-bold text-[#0F172A] tracking-tight truncate shrink-0">SafeTrack</span>
+              <span
+                class="hidden md:inline-flex px-2 py-0.5 rounded-md bg-[#F1F5F9] font-mono text-[10px] font-semibold text-[#64748B] tracking-wider uppercase shrink-0">PREFECT DESK</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Cluster: Audit Log + Notifications + User ID + Online Status + Student View + Log Out -->
+        <div class="flex items-center gap-2 shrink-0 header-right-cluster">
+          <!-- 🛡️ Admin Security Audit Log Trigger -->
+          <button id="btn-audit-log-admin" onclick="openAuditLogModal()"
+            class="header-btn-audit hidden md:inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-slate-200/80 bg-white hover:bg-[#F1F5F9] text-xs font-medium text-[#0F172A] transition-colors whitespace-nowrap shrink-0"
+            title="View Immutable Security Audit Log">
+            <span class="text-xs shrink-0">🛡️</span>
+            <span class="hidden xs:inline sm:inline">Audit Log</span>
+          </button>
+
+          <!-- 🔔 System Notifications Bell -->
+          <div class="relative shrink-0">
+            <button id="btn-notifications-admin" onclick="toggleNotificationDropdown('admin', event)"
+              class="header-bell-btn cursor-pointer relative w-8 h-8 rounded-full border border-slate-200/80 bg-white text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] flex items-center justify-center transition-colors shrink-0"
+              title="System Notifications"
+              aria-label="Notifications">
+              <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span id="badge-notifications-admin"
+                class="header-bell-badge absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#2563EB] text-white text-[9px] font-bold flex items-center justify-center">0</span>
+            </button>
+            <div id="dropdown-notifications-admin" class="hidden absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl bg-white border border-slate-200/80 shadow-lg p-3 z-50 font-sans text-[#0F172A] text-left" style="display: none;">
+              <!-- Dynamically populated by app.js -->
+            </div>
+          </div>
+
+          <div class="header-id-pill hidden md:flex items-center px-3 py-1.5 rounded-full border border-slate-200/80 bg-[#F1F5F9]/60 text-xs text-[#64748B] whitespace-nowrap shrink-0">
+            ID: <span class="font-semibold text-[#0F172A] ml-1 tabular-nums">prefect@cdm.edu.ph</span>
+          </div>
+
+          <div id="network-badge-admin" class="hidden lg:inline-flex shrink-0">
+            <span class="network-pwa-badge inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50/80 text-emerald-700 border border-emerald-200/60 text-xs font-medium whitespace-nowrap shrink-0">
+              <span class="network-pwa-dot w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span>
+              Online (PWA Ready)
+            </span>
+          </div>
+
+          <!-- Role/Account Toggle Pill (Admin Side) -->
+          <button id="role-toggle-pill-admin" onclick="switchActivePortalRole('student')"
+            class="role-toggle-pill hidden md:inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full border border-slate-200/80 bg-white hover:bg-[#F1F5F9] text-xs font-medium text-[#0F172A] transition-colors whitespace-nowrap shrink-0"
+            title="Switch to Student Space View">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#635BFF] shrink-0"></span>
+            <span class="font-semibold">Student View</span>
+          </button>
+
+          <button id="btn-install-admin"
+            class="hidden h-9 px-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-[#0F172A] text-xs font-medium cursor-pointer transition items-center gap-1.5 whitespace-nowrap shrink-0 shadow-sm">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Install App
+          </button>
+
+          <button id="btn-admin-logout" onclick="handleLogout()"
+            class="header-btn-logout inline-flex items-center justify-center gap-1 w-8 h-8 sm:w-auto sm:px-3 sm:py-1.5 rounded-full border border-rose-200/80 bg-rose-50/70 hover:bg-rose-100 text-rose-600 text-xs font-medium transition-colors whitespace-nowrap shrink-0"
+            title="Log out and return to portal login">
+            <svg class="size-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Admin Horizontal Tabs Navigation Bar -->
+    <div id="admin-secondary-nav-wrapper" class="w-full bg-white sm:bg-transparent border-b border-slate-200/70 sm:border-0 admin-secondary-nav">
+      <div class="max-w-5xl mx-auto pt-6 pb-2 px-4">
+        <div class="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-4 border-b border-slate-200/70 admin-tabs-nav-bar">
+          <button id="admin-tab-home"
+            class="px-4 py-2 rounded-full bg-[#2563EB] text-white text-xs sm:text-[13px] font-semibold shadow-sm inline-flex justify-center items-center gap-2 transition-colors cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Institutional Overview
+          </button>
+
+          <button id="admin-tab-registry"
+            class="px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors inline-flex justify-center items-center gap-2 cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M3 9h18M9 21V9" />
+            </svg>
+            Disciplinary Case Registry
+          </button>
+
+          <button id="admin-tab-clearance"
+            class="px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors inline-flex justify-center items-center gap-2 cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            Clearance &amp; Good Moral Verification
+          </button>
+
+          <button id="admin-tab-appointments" onclick="switchAdminTab('appointments')"
+            class="px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors inline-flex justify-center items-center gap-2 cursor-pointer shrink-0">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>Appointments &amp; Queue</span>
+          </button>
+
+          <button id="admin-tab-messages"
+            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-white text-[#64748B] border border-slate-200/80 hover:text-[#0F172A] text-xs sm:text-[13px] font-medium transition-colors cursor-pointer shrink-0">
+            <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span>OSAS Chat</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Main Viewport -->
+    <main class="dashboard-main-content flex-1 px-4 sm:px-6 pt-5 pb-14 max-w-5xl w-full mx-auto space-y-6 font-sans bg-transparent min-h-[calc(100vh-64px)] text-white">
+
+      <!-- ======================================================== -->
+      <!-- MODULE 3: DEDICATED ADMIN "HOME" HUB (#admin-view-home)  -->
+      <!-- ======================================================== -->
+      <div id="admin-view-home" class="admin-overview-container w-full space-y-6 font-sans">
+
+        <!-- Executive Hero Banner -->
+        <section class="admin-hero-banner rounded-2xl bg-[#0F172A] text-white p-7 sm:p-10 relative overflow-hidden" style="background-color: #0F172A !important; color: #FFFFFF !important;">
+          <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-[#2563EB]/20 blur-3xl pointer-events-none"></div>
+          <div class="relative max-w-2xl space-y-4">
+            <div class="hero-badge-row flex flex-wrap items-center gap-2">
+              <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase">EXECUTIVE OVERVIEW</span>
+              <span class="text-xs font-mono text-slate-400">AY 2024–2025 Registry</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-tight">Office of the Prefect &amp; Student Affairs • Institutional Overview</h2>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">Consolidated grievance telemetry, incident docketing statistics, and disciplinary clearance validation desk.</p>
+            <div class="hero-cta-row flex flex-wrap gap-3 pt-2">
+              <button onclick="switchAdminTab('registry')" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-semibold transition-colors shadow-sm cursor-pointer whitespace-nowrap">
+                <span>Open Case Registry</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4-Column Independent KPI Metric Cards -->
+        <div id="admin-home-kpi-deck" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+          <!-- Populated by app.js renderAdminKPIs -->
+        </div>
+
+        <!-- Quick Action Direct Portals (Exact Blueprint Proportions) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+          <div onclick="switchAdminTab('registry')" class="quick-action-card bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5 cursor-pointer hover:border-slate-300 transition-colors shadow-sm">
+            <div class="space-y-3">
+              <div class="feature-icon-badge w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M3 9h18M9 21V9" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-[#0F172A]">Case Registry</h3>
+              <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">Review active inquiries &amp; board decisions</p>
+            </div>
+            <button class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors inline-flex items-center justify-center gap-2">
+              <span>Open Case Registry</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <div onclick="switchAdminTab('clearance')" class="quick-action-card bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5 cursor-pointer hover:border-slate-300 transition-colors shadow-sm">
+            <div class="space-y-3">
+              <div class="feature-icon-badge w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-[#0F172A]">Clearance Desk</h3>
+              <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">Validate student good moral standing</p>
+            </div>
+            <button class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors inline-flex items-center justify-center gap-2">
+              <span>Verify Status</span>
+              <span>→</span>
+            </button>
+          </div>
+
+          <div onclick="switchAdminTab('appointments')" class="quick-action-card bg-white rounded-2xl border border-slate-200/70 p-6 flex flex-col justify-between gap-5 cursor-pointer hover:border-slate-300 transition-colors shadow-sm">
+            <div class="space-y-3">
+              <div class="feature-icon-badge w-9 h-9 rounded-xl bg-[#F1F5F9] text-[#06B6D4] flex items-center justify-center shrink-0">
+                <svg width="18" height="18" class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 2v4M16 2v4M3 10h18" />
+                  <rect width="18" height="18" x="3" y="4" rx="2" />
+                </svg>
+              </div>
+              <h3 class="text-base font-semibold text-[#0F172A]">Appointments &amp; Queue</h3>
+              <p class="text-xs sm:text-sm text-[#64748B] leading-relaxed">Schedule hearings &amp; call walk-in tickets</p>
+            </div>
+            <button class="w-full py-2.5 px-4 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs sm:text-sm font-medium transition-colors inline-flex items-center justify-center gap-2">
+              <span>Manage Queue</span>
+              <span>→</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="admin-view-registry" class="space-y-6 hidden">
+
+        <!-- 4 KPI Metric Cards -->
+        <div id="admin-registry-kpi-deck" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+
+        <!-- Filter & Case Registry Table Container Wrapper -->
+        <div class="bg-white rounded-2xl border border-slate-200/70 shadow-sm overflow-hidden">
+
+          <!-- Registry Header Bar -->
+          <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-white">
+            <div>
+              <h1 class="text-xl font-bold text-[#0F172A]">Disciplinary Case Registry</h1>
+              <p class="text-xs text-[#64748B] mt-0.5">Searchable institutional record of student infractions, inquiries, and board dispositions.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span id="filter-count" class="text-xs font-semibold text-[#64748B]">Loading...</span>
+              <button id="btn-open-admin-docket"
+                class="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-semibold shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
+                <svg class="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>New Incident</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4-Column Filter Row -->
+          <div class="p-6 pt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end bg-slate-50/50 border-b border-slate-100">
+            <div>
+              <label class="block text-xs font-semibold text-[#0F172A] mb-1.5" for="input-search">Search Case / Student / ID</label>
+              <input type="text" id="input-search" placeholder="Filter by name, ID, or docket..."
+                class="w-full h-10 text-xs rounded-xl border border-slate-200/80 bg-white text-[#0F172A] placeholder:text-slate-400 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-[#0F172A] mb-1.5" for="filter-institute">Academic Institute</label>
+              <select id="filter-institute"
+                class="w-full h-10 text-xs rounded-xl border border-slate-200/80 bg-white text-[#0F172A] px-3 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-500 cursor-pointer">
+                <option value="ALL">All Institutes (ICS, IEd, IBA, IE)</option>
+                <option value="ICS">ICS - Institute of Computer Studies</option>
+                <option value="IEd">IEd - Institute of Education</option>
+                <option value="IBA">IBA - Institute of Business &amp; Accountancy</option>
+                <option value="IE">IE - Institute of Engineering</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-[#0F172A] mb-1.5" for="filter-status">Disciplinary Status</label>
+              <select id="filter-status"
+                class="w-full h-10 text-xs rounded-xl border border-slate-200/80 bg-white text-[#0F172A] px-3 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-500 cursor-pointer">
+                <option value="ALL">All Case Statuses</option>
+                <option value="Pending">Pending Hearing</option>
+                <option value="Investigation">Under Investigation</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+            </div>
+
+            <div>
+              <button id="btn-reset-filter"
+                class="w-full h-10 text-xs rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-colors cursor-pointer">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Content Area -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+                  <th class="px-4 py-3.5">Docket #</th>
+                  <th class="px-4 py-3.5">Involved Student</th>
+                  <th class="px-4 py-3.5">Classification</th>
+                  <th class="px-4 py-3.5">Status</th>
+                  <th class="px-4 py-3.5">Date Filed</th>
+                  <th class="py-4 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="registry-table-body" class="divide-y divide-slate-100 text-sm">
+                <!-- Injected via app.js -->
+              </tbody>
+            </table>
+
+            <div id="registry-empty-state" class="hidden p-8 text-center bg-white text-[#64748B]">
+              <div class="inline-block bg-slate-100 rounded-full p-4 mb-3 text-[#64748B]">
+                <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+              </div>
+              <div class="font-bold text-[#0F172A] text-base">No Matching Records Found</div>
+              <div class="text-xs text-[#64748B] mt-1">Try clearing or adjusting search filters to reveal student dockets.</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div id="admin-view-clearance" class="hidden">
+        <div class="bg-white border border-slate-200/70 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6 text-[#0F172A]">
+          <div class="border-b border-slate-100 pb-4">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <h2 class="text-xl font-bold text-[#0F172A]">Good Moral &amp; Discipline Clearance Verification Tool</h2>
+              <span class="realtime-validator-pill bg-[#F1F5F9] text-[#0F172A] text-xs font-semibold px-2.5 py-0.5 rounded-full">Real-Time Validator</span>
+            </div>
+            <p class="text-xs text-[#64748B] mt-1">
+              Validates active administrative holds, pending discipline hearings, or unfulfilled community sanctions against student ID.
+            </p>
+          </div>
+
+          <div class="max-w-xl space-y-3">
+            <label class="block text-xs font-semibold text-[#0F172A]" for="input-verify-id">
+              Enter Colegio de Montalban Student ID
+            </label>
+            <div class="flex flex-col sm:flex-row items-stretch gap-2.5">
+              <input type="text" id="input-verify-id" placeholder="e.g. 2023-08124-CM-0"
+                class="flex-1 bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/15 focus:border-blue-500 placeholder:text-slate-400">
+              <button id="btn-verify-clearance"
+                class="bg-[#2563EB] hover:bg-[#1D4ED8] text-white px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition shrink-0 flex items-center justify-center gap-2 shadow-sm">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </svg>
+                <span>Verify Status</span>
+              </button>
+            </div>
+
+            <!-- Quick Query Presets -->
+            <div class="flex flex-wrap items-center gap-2 pt-1 text-xs text-[#64748B]">
+              <span class="font-medium">Quick Query:</span>
+              <button type="button" id="2023-08124-CM-0"
+                onclick="document.getElementById('input-verify-id').value = '2023-08124-CM-0'; document.getElementById('btn-verify-clearance').click();"
+                class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-mono text-[11px] font-medium transition-colors cursor-pointer">
+                2023-08124-CM-0 (Clear)
+              </button>
+              <button type="button" id="2021-00213-CM-0"
+                onclick="document.getElementById('input-verify-id').value = '2021-00213-CM-0'; document.getElementById('btn-verify-clearance').click();"
+                class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-mono text-[11px] font-medium transition-colors cursor-pointer">
+                2021-00213-CM-0 (Hold)
+              </button>
+              <button type="button" id="2022-01492-CM-0"
+                onclick="document.getElementById('input-verify-id').value = '2022-01492-CM-0'; document.getElementById('btn-verify-clearance').click();"
+                class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-mono text-[11px] font-medium transition-colors cursor-pointer">
+                2022-01492-CM-0 (Clear)
+              </button>
+              <button type="button" id="2024-00999-CM-0"
+                onclick="document.getElementById('input-verify-id').value = '2024-00999-CM-0'; document.getElementById('btn-verify-clearance').click();"
+                class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0F172A] font-mono text-[11px] font-medium transition-colors cursor-pointer">
+                2024-00999-CM-0 (Hold)
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Verification Result Container -->
+          <div id="clearance-result" class="hidden">
+            <!-- Rendered by app.js performClearanceVerification -->
+          </div>
+
+        </div>
+      </div>
+
+      <div id="admin-view-appointments" class="hidden space-y-6" style="display: none;">
+        <!-- Hero Header -->
+        <section class="rounded-2xl bg-[#0F172A] text-white p-7 sm:p-9 relative overflow-hidden" style="background-color: #0F172A !important; color: #FFFFFF !important;">
+          <div class="absolute -right-20 -top-20 w-64 h-64 rounded-full bg-[#2563EB]/20 blur-3xl pointer-events-none"></div>
+          <div class="relative z-10 max-w-2xl">
+            <div class="flex flex-wrap items-center gap-2.5 mb-4">
+              <span class="px-3 py-1 rounded-full bg-white text-[#0F172A] text-[10px] font-bold tracking-wider uppercase font-mono">
+                OSAS PREFECT DESK &amp; CGCC QUEUE ENGINE
+              </span>
+              <span class="px-3 py-1 rounded-full bg-white/10 text-[#06B6D4] text-[11px] font-medium">
+                Active Consultation Hub
+              </span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2 leading-tight">
+              Consultations &amp; Live Walk-In Queue
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+              Coordinate face-to-face hearings, restorative counseling sessions, and manage real-time on-campus walk-in ticket flows.
+            </p>
+          </div>
+        </section>
+
+        <!-- Live Walk-In Controller Card & KPI Deck -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="md:col-span-2 bg-white rounded-2xl border border-slate-200/70 p-6 shadow-sm flex flex-col justify-between text-[#0F172A]">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div class="flex items-center gap-2">
+                <span class="size-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-[#64748B]">Walk-In Ticket Dispenser Control</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button onclick="adminCallNextWalkIn()"
+                  class="px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold shadow-sm transition-colors cursor-pointer flex items-center gap-1.5">
+                  <span>🔔</span>
+                  <span>Call Next</span>
+                </button>
+                <button onclick="adminResetQueue()"
+                  class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors cursor-pointer">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- Queue Status Box -->
+            <div class="grid grid-cols-2 gap-4 my-2">
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-center flex flex-col items-center justify-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#64748B] mb-1">Now Serving Ticket</span>
+                <span id="admin-now-serving-badge" class="text-3xl sm:text-4xl font-extrabold text-[#2563EB] font-mono tabular-nums leading-none">--</span>
+              </div>
+              <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-center flex flex-col items-center justify-center">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#64748B] mb-1">Students Waiting</span>
+                <span id="admin-waiting-queue-count" class="text-3xl sm:text-4xl font-extrabold text-[#0F172A] font-mono tabular-nums leading-none">0</span>
+              </div>
+            </div>
+            <div class="text-[11px] text-[#64748B] pt-3 border-t border-slate-100">
+              *Calling ticket triggers audio tone &amp; synchronizes student live pass state across devices.
+            </div>
+          </div>
+
+          <!-- Appointments KPI Deck -->
+          <div class="space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200/70 p-5 shadow-sm flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#64748B] block">Confirmed Bookings</span>
+                <span id="stat-apt-confirmed" class="text-2xl font-bold text-[#0F172A] tabular-nums mt-0.5 block">0</span>
+              </div>
+              <span class="text-xl">✅</span>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200/70 p-5 shadow-sm flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#64748B] block">Pending Requests</span>
+                <span id="stat-apt-pending" class="text-2xl font-bold text-[#0F172A] tabular-nums mt-0.5 block">0</span>
+              </div>
+              <span class="text-xl">⏳</span>
+            </div>
+            <div class="bg-white rounded-2xl border border-slate-200/70 p-5 shadow-sm flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-[#64748B] block">Completed Consultations</span>
+                <span id="stat-apt-completed" class="text-2xl font-bold text-[#0F172A] tabular-nums mt-0.5 block">0</span>
+              </div>
+              <span class="text-xl">🎉</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Appointments & Hearings Table -->
+        <div class="bg-white rounded-2xl border border-slate-200/70 overflow-hidden shadow-sm">
+          <div class="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-white">
+            <div>
+              <h3 class="text-base font-bold text-[#0F172A]">Scheduled Hearing Sessions &amp; Appointments</h3>
+              <p class="text-xs text-[#64748B] mt-0.5">Filter face-to-face appointments by office category or confirmation status.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="admin-filter-apt-type" onchange="renderAdminAppointments()"
+                class="h-9 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200/80 text-[#0F172A] font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/15 cursor-pointer">
+                <option value="ALL">All Types</option>
+                <option value="OSAS Prefect Desk">OSAS Prefect</option>
+                <option value="College Guidance &amp; Counseling Center (Room 201)">CGCC Counseling</option>
+                <option value="Walk-In Ticket">Walk-In Tickets</option>
+              </select>
+              <select id="admin-filter-apt-status" onchange="renderAdminAppointments()"
+                class="h-9 px-3 text-xs rounded-xl bg-slate-50 border border-slate-200/80 text-[#0F172A] font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/15 cursor-pointer">
+                <option value="ALL">All Status</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+                  <th class="px-4 py-3.5">Type</th>
+                  <th class="px-4 py-3.5">Student Details</th>
+                  <th class="px-4 py-3.5">Date &amp; Slot</th>
+                  <th class="px-4 py-3.5">Office / Category</th>
+                  <th class="py-4 px-5 text-center">Status</th>
+                  <th class="py-4 px-5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-appointments-table-body" class="divide-y divide-slate-100 text-sm">
+                <!-- Rendered by app.js renderAdminAppointments -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="admin-view-messages" class="hidden w-full h-full" style="display: none;">
+        <div id="admin-messaging-container" class="hidden w-full h-full" style="display: none;"></div>
+      </div>
+
+    </main>
+
+    <!-- Admin Footer -->
+    <footer class="bg-[#050914] border-t border-[#16233b] py-4 mt-auto">
+      <div
+        class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div>
+          <span class="font-semibold text-white">Colegio de Montalban</span> • SafeTrack Administrator Portal
+        </div>
+        <div class="flex items-center gap-4">
+          <button id="btn-reset-data" class="text-xs text-slate-400 hover:text-white underline cursor-pointer">
+            Reset Sample Records
+          </button>
+          <span>Prefect of Discipline &amp; Student Affairs</span>
+        </div>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ADMIN CASE INSPECTOR                              -->
+  <!-- ======================================================== -->
+  <div id="modal-case-viewer"
+    class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 font-sans overflow-x-hidden">
+    <div
+      class="w-full max-w-2xl bg-white rounded-2xl border border-slate-200/70 shadow-xl flex flex-col max-h-[90vh] overflow-hidden relative text-[#0F172A]">
+      <div id="modal-case-details" class="flex flex-col h-full max-h-[90vh] overflow-hidden">
+        <!-- Injected by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: ADMIN DIRECT DOCKET ("+ New Incident")            -->
+  <!-- ======================================================== -->
+  <div id="modal-admin-docket"
+    class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-x-hidden">
+    <div
+      class="bg-white border border-slate-200/70 rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl relative text-[#0F172A] font-sans">
+      <div class="flex items-center justify-between border-b border-[#16233b] p-6 bg-[#070d1a]">
+        <div>
+          <div class="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Office Intake</div>
+          <h2 class="text-xl font-bold text-[#0F172A]">Direct Case Docketing</h2>
+        </div>
+        <button id="btn-close-admin-docket"
+          class="text-slate-400 hover:text-[#0F172A] bg-white border border-slate-200/70 rounded-full p-2 cursor-pointer transition">
+          <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <form id="admin-docket-form" class="p-6 flex flex-col gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-classification">Classification
+              *</label>
+            <select id="docket-classification" required
+              class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-[#635BFF]/30 focus:border-[#635BFF] cursor-pointer">
+              <option value="Article VI, Sec 4.56 — AI Tool Misuse &amp; Generative Academic Fraud">Article VI, Sec 4.56 — AI Tool Misuse &amp; Generative Academic Fraud</option>
+              <option value="Article VI, Sec 4.55 — Online Harassment &amp; Cyberbullying">Article VI, Sec 4.55 — Online Harassment &amp; Cyberbullying</option>
+              <option value="Article VI, Sec 4.54 — Unauthorized Class Recording">Article VI, Sec 4.54 — Unauthorized Class Recording</option>
+              <option value="Article VI, Sec 4.57 — Unauthorized Financial Solicitation">Article VI, Sec 4.57 — Unauthorized Financial Solicitation</option>
+              <option value="Article VI, Sec 4.10 — Non-wearing / Improper Uniform &amp; ID Card">Article VI, Sec 4.10 — Non-wearing / Improper Uniform &amp; ID Card</option>
+              <option value="Article VI, Sec 4.9 — Attire, Grooming &amp; Piercings Non-compliance">Article VI, Sec 4.9 — Attire, Grooming &amp; Piercings Non-compliance</option>
+              <option value="Article VI, Sec 4.5 — Campus Disturbance &amp; Noise Commotion">Article VI, Sec 4.5 — Campus Disturbance &amp; Noise Commotion</option>
+              <option value="Article VI, Sec 4.36 — Defacing Property &amp; Vandalism">Article VI, Sec 4.36 — Defacing Property &amp; Vandalism</option>
+              <option value="Article VI, Sec 4.3 — Smoking / Vaping within Campus">Article VI, Sec 4.3 — Smoking / Vaping within Campus</option>
+              <option value="Article VI, Sec 4.7 — Possession / Influence of Alcohol">Article VI, Sec 4.7 — Possession / Influence of Alcohol</option>
+              <option value="Article VI, Sec 4.8 — Gambling &amp; Betting within Campus">Article VI, Sec 4.8 — Gambling &amp; Betting within Campus</option>
+              <option value="Article VI, Sec 4.39 — Carrying Deadly Weapons">Article VI, Sec 4.39 — Carrying Deadly Weapons</option>
+              <option value="Article VI, Sec 4.45 — Hazing / Illegal Fraternities &amp; Sororities">Article VI, Sec 4.45 — Hazing / Illegal Fraternities &amp; Sororities</option>
+              <option value="Article VI, Sec 4.51 — Sexual Harassment">Article VI, Sec 4.51 — Sexual Harassment</option>
+              <option value="Article VI, Sec 4.53 — Violation of Institutional Code of Conduct">Article VI, Sec 4.53 — Violation of Institutional Code of Conduct</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-institute">Institute *</label>
+            <select id="docket-institute" required
+              class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 cursor-pointer">
+              <option value="ICS">ICS - Computer Studies</option>
+              <option value="IEd">IEd - Education</option>
+              <option value="IBA">IBA - Business & Accountancy</option>
+              <option value="IE">IE - Engineering</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-student-number">Student Number
+              *</label>
+            <input type="text" id="docket-student-number" required placeholder="e.g. 2023-01842-CM-0"
+              class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-student-name">Student Full Name
+              *</label>
+            <input type="text" id="docket-student-name" required placeholder="e.g. Juan De La Cruz"
+              class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-date">Incident Date *</label>
+            <input type="date" id="docket-date" required
+              class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-location">Location *</label>
+            <input type="text" id="docket-location" required placeholder="e.g. Building B 3rd Floor"
+              class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-500">
+          </div>
+        </div>
+
+        <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3.5 flex items-center gap-2.5">
+          <input type="checkbox" id="docket-guidance"
+            class="size-4 rounded-sm text-blue-600 focus:ring-blue-500 cursor-pointer">
+          <label for="docket-guidance" class="text-xs font-semibold text-blue-300 cursor-pointer">Endorse to College
+            Guidance (CGCC) for intervention</label>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-description">Incident Description
+            *</label>
+          <textarea id="docket-description" required rows="3" placeholder="Enter full statement of the case..."
+            class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl p-3 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-500"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1" for="docket-sanctions">Initial Board Action /
+            Notes</label>
+          <input type="text" id="docket-sanctions" placeholder="e.g. Hearing scheduled for next Wednesday"
+            class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-slate-500">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#16233b]">
+          <button type="submit"
+            class="bg-[#2563eb] hover:bg-blue-600 text-[#0F172A] px-6 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer shadow-[0_4px_16px_rgba(37,99,235,0.35)]">
+            Create Disciplinary Docket
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: OFFICIAL CERTIFICATE OF GOOD MORAL CHARACTER      -->
+  <!-- ======================================================== -->
+  <div id="modal-good-moral-cert"
+    class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div
+      class="bg-white text-slate-900 border border-slate-300 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl relative my-auto p-8 sm:p-10 font-sans printable-certificate">
+      <!-- Close / Actions Top Bar (hidden during print) -->
+      <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200 no-print">
+        <div class="flex items-center gap-2">
+          <span
+            class="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">Official
+            Electronic Clearance Document</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()"
+            class="px-3.5 py-1.5 rounded-xl bg-[#2563eb] hover:bg-blue-600 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect x="6" y="14" width="12" height="8" />
+            </svg>
+            <span>Print Certificate</span>
+          </button>
+          <button id="btn-close-cert"
+            class="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 cursor-pointer transition">✕</button>
+        </div>
+      </div>
+
+      <!-- Institutional Letterhead -->
+      <div class="text-center pb-6 border-b-2 border-slate-800 mb-6">
+        <div class="text-[11px] uppercase tracking-widest text-slate-600 font-semibold">Republic of the Philippines •
+          Municipality of Rodriguez (Montalban), Rizal</div>
+        <h2 class="text-2xl font-black tracking-wide text-slate-900 uppercase mt-1">Colegio de Montalban</h2>
+        <div class="text-xs font-bold text-emerald-800 uppercase tracking-wider mt-0.5">Office of Student Affairs &
+          Prefect of Discipline</div>
+        <div class="text-[10px] text-slate-500 mt-1">Kasiglahan Village, Rodriguez, Rizal, Philippines • Tel: (02)
+          8-941-0000 • studentaffairs@cdm.edu.ph</div>
+      </div>
+
+      <!-- Title -->
+      <div class="text-center my-6">
+        <h1
+          class="text-xl sm:text-2xl font-black uppercase tracking-wider text-slate-900 border-b-2 border-emerald-800 inline-block pb-1">
+          Certificate of Good Moral Character
+        </h1>
+      </div>
+
+      <!-- Certificate Body -->
+      <div class="text-xs sm:text-sm text-slate-800 leading-relaxed space-y-4 mb-8 text-justify">
+        <p>
+          <strong>TO WHOM IT MAY CONCERN:</strong>
+        </p>
+        <p>
+          This is to certify that according to official records maintained by the <strong>SafeTrack Institutional
+            Disciplinary Registry</strong> of Colegio de Montalban,
+        </p>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center my-3">
+          <div class="text-base sm:text-lg font-bold text-slate-900 uppercase tracking-wide" id="cert-student-name">
+            Student Full Name</div>
+          <div class="text-xs font-mono text-emerald-800 font-semibold mt-0.5">Student ID: <span
+              id="cert-student-id">2023-01842-CM-0</span> • <span id="cert-student-institute">Institute of Computer
+              Studies</span></div>
+        </div>
+        <p>
+          is a bona fide student of Colegio de Montalban in good standing who has demonstrated upright moral conduct,
+          exemplary behavioral discipline, and respectful adherence to the policies, rules, and regulations set forth in
+          the <em>Colegio de Montalban Student Handbook</em> and Republic Act No. 10627.
+        </p>
+        <p>
+          He/She has <strong>NO DEROGATORY RECORD</strong> nor any pending unresolved disciplinary proceedings or
+          behavioral sanctions on file with the Office of the Prefect of Discipline as of this date.
+        </p>
+        <p>
+          This electronic certification is issued upon the request of the interested party for <strong>Graduation,
+            Transfer, Academic Scholarship, Board Licensure, or Employment Purposes</strong>.
+        </p>
+      </div>
+
+      <!-- Date & Verification Code -->
+      <div
+        class="flex flex-col sm:flex-row items-center justify-between text-xs text-slate-600 mb-8 pb-4 border-b border-slate-100 gap-2">
+        <div>
+          <span>Issued on: </span><strong id="cert-issue-date" class="text-slate-900">November 10, 2026</strong>
+        </div>
+        <div class="font-mono text-[11px] text-slate-500 bg-slate-50 px-3 py-1 rounded-md border border-slate-200">
+          Digital Doc ID: <span id="cert-hash" class="text-slate-800 font-bold">CDM-GMC-2026-98124</span>
+        </div>
+      </div>
+
+      <!-- Signatures Grid -->
+      <div class="grid grid-cols-2 gap-8 text-center pt-2">
+        <div>
+          <div class="border-b border-slate-400 w-3/4 mx-auto mb-1"></div>
+          <div class="font-bold text-xs text-slate-900 uppercase">Atty. Roberto C. Almonte</div>
+          <div class="text-[10px] text-slate-500">Prefect of Student Discipline</div>
+        </div>
+        <div>
+          <div class="border-b border-slate-400 w-3/4 mx-auto mb-1"></div>
+          <div class="font-bold text-xs text-slate-900 uppercase">Dr. Ma. Cristina Santos</div>
+          <div class="text-[10px] text-slate-500">Dean, Office of Student Affairs</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- OSAS Evidence Lightbox Zoom Modal -->
+  <div id="osas-lightbox-modal" onclick="if(event.target === this) closeOSASLightbox()"
+    class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 transition-opacity cursor-pointer">
+    <div
+      class="relative max-w-4xl w-full bg-white border border-slate-200/70 rounded-2xl overflow-hidden shadow-xl flex flex-col max-h-[90vh] cursor-default">
+      <div
+        class="px-5 py-3.5 bg-[#060b16] border-b border-slate-800 flex items-center justify-between text-xs text-white">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400 font-bold">OSAS Evidence Viewer</span>
+          <span class="text-slate-400 font-mono text-[11px]" id="osas-lightbox-title"></span>
+        </div>
+        <div class="flex items-center gap-3">
+          <a id="osas-lightbox-download" href="#" download="evidence.png"
+            class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium flex items-center gap-1.5 text-xs transition cursor-pointer">
+            <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Download
+          </a>
+          <button type="button" onclick="closeOSASLightbox()"
+            class="size-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition cursor-pointer">
+            ✕
+          </button>
+        </div>
+      </div>
+      <div class="p-4 flex items-center justify-center bg-black/70 overflow-auto flex-1 min-h-[300px]">
+        <img id="osas-lightbox-img" src="" alt="OSAS Evidence Preview"
+          class="max-h-[75vh] max-w-full object-contain rounded-lg shadow-lg">
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Application Logic -->
+  
+  <!-- ======================================================== -->
+  <!-- HCI MODAL: QUICK HELP & REQUEST TRACKER                  -->
+  <!-- ======================================================== -->
+  <div id="modal-quick-help" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto" style="display: none;">
+    <div class="bg-white border border-slate-200/70 text-[#0F172A] font-sans my-auto shadow-2xl relative"
+      style="max-width: 680px; width: 95%; max-height: 90dvh; overflow-y: auto; padding: 32px; border-radius: 20px;">
+      <!-- Close Button (Far top-right, never overlaps red SOS icon) -->
+      <button onclick="closeQuickHelpModal()"
+        aria-label="Close modal"
+        class="transition hover:bg-slate-700/60"
+        style="position: absolute; top: 24px; right: 24px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(30, 41, 59, 0.6); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.2); cursor: pointer; z-index: 10;">
+        <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <!-- Modal Title -->
+      <div class="flex items-center gap-3 mb-5 pr-10">
+        <div class="size-11 rounded-2xl bg-red-600/20 text-red-400 border border-red-500/30 flex items-center justify-center text-xl shrink-0">🆘</div>
+        <div>
+          <h2 class="text-lg font-bold text-[#0F172A] leading-tight">SafeTrack Immediate Quick Help Desk</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Priority welfare assistance, crisis guidance, and urgent incident intake.</p>
+        </div>
+      </div>
+
+      <!-- Sub-Tabs Switcher -->
+      <div class="flex items-center gap-2 border-b border-[#16233b] pb-3 mb-6">
+        <button id="btn-qh-tab-submit" onclick="switchQuickHelpTab('submit')"
+          class="px-4 py-2 rounded-xl bg-[#2563eb] text-[#0F172A] text-xs font-bold transition cursor-pointer flex items-center gap-2 shadow-[0_4px_16px_rgba(37,99,235,0.35)]">
+          <span>📝 Submit Request</span>
+        </button>
+        <button id="btn-qh-tab-track" onclick="switchQuickHelpTab('track')"
+          class="px-4 py-2 rounded-xl bg-[#070d1a] hover:bg-[#111c33] border border-[#16233b] text-slate-400 hover:text-[#0F172A] text-xs font-semibold transition cursor-pointer flex items-center gap-2">
+          <span>📍 Track My Requests</span>
+          <span id="badge-qh-track-count" class="bg-blue-600/30 text-blue-300 text-[10px] px-1.5 py-0.5 rounded-full font-mono">0</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: SUBMIT REQUEST -->
+      <div id="pane-qh-submit">
+        <!-- Visual Category Cards (2-Column Breathable Grid) -->
+        <div style="margin-bottom: 22px;">
+          <label class="block text-xs font-bold text-slate-300 mb-1">Select Immediate Concern Category:</label>
+          <div class="qh-category-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 10px; margin-bottom: 24px;">
+            <div onclick="selectQuickHelpCategory('Bullying', this)"
+              class="qh-category-card selected"
+              style="padding: 14px 18px; border-radius: 14px; border: 2px solid #3b82f6; background: rgba(37, 99, 235, 0.14); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.18s ease;">
+              <span class="text-2xl shrink-0">🛡️</span>
+              <div class="min-w-0">
+                <span class="font-bold text-[#0F172A] text-xs block leading-tight">Bullying</span>
+                <span class="text-[11px] text-slate-400 leading-snug block mt-1">Harassment, cyber-intimidation, or peer conflict</span>
+              </div>
+            </div>
+
+            <div onclick="selectQuickHelpCategory('Academic', this)"
+              class="qh-category-card"
+              style="padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.22); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.18s ease;">
+              <span class="text-2xl shrink-0">📚</span>
+              <div class="min-w-0">
+                <span class="font-bold text-[#0F172A] text-xs block leading-tight">Academic</span>
+                <span class="text-[11px] text-slate-400 leading-snug block mt-1">Faculty consultation, exam distress, or grading issue</span>
+              </div>
+            </div>
+
+            <div onclick="selectQuickHelpCategory('Personal', this)"
+              class="qh-category-card"
+              style="padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.22); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.18s ease;">
+              <span class="text-2xl shrink-0">🤝</span>
+              <div class="min-w-0">
+                <span class="font-bold text-[#0F172A] text-xs block leading-tight">Personal</span>
+                <span class="text-[11px] text-slate-400 leading-snug block mt-1">Emotional distress, family matters, or counseling</span>
+              </div>
+            </div>
+
+            <div onclick="selectQuickHelpCategory('Safety', this)"
+              class="qh-category-card"
+              style="padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.22); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.18s ease;">
+              <span class="text-2xl shrink-0">⚠️</span>
+              <div class="min-w-0">
+                <span class="font-bold text-[#0F172A] text-xs block leading-tight">Safety</span>
+                <span class="text-[11px] text-slate-400 leading-snug block mt-1">Immediate campus hazard, threat, or physical risk</span>
+              </div>
+            </div>
+
+            <div onclick="selectQuickHelpCategory('Others', this)"
+              class="qh-category-card"
+              style="grid-column: 1 / -1; padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(148, 163, 184, 0.22); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.18s ease;">
+              <span class="text-2xl shrink-0">💬</span>
+              <div class="min-w-0">
+                <span class="font-bold text-[#0F172A] text-xs block leading-tight">Others / Unlisted Concern</span>
+                <span class="text-[11px] text-slate-400 leading-snug block mt-1">General inquiries, student services, or unlisted student welfare questions</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Fields with Generous 22px Spacing -->
+        <!-- Urgency Level -->
+        <div style="margin-bottom: 22px;">
+          <label class="block text-xs font-semibold text-slate-300 mb-2">Urgency Level:</label>
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <label class="cursor-pointer bg-[#070d1a] border border-[#1e293b] text-xs text-slate-300 transition hover:border-slate-600"
+              style="padding: 12px 18px; gap: 10px; border-radius: 12px; display: inline-flex; align-items: center;">
+              <input type="radio" name="qh-urgency" value="Standard" checked class="text-blue-600 focus:ring-blue-500">
+              <span class="font-medium">Standard (Routine Response)</span>
+            </label>
+            <label class="cursor-pointer bg-red-600/10 border border-red-500/30 text-xs text-red-300 font-semibold transition hover:border-red-400"
+              style="padding: 12px 18px; gap: 10px; border-radius: 12px; display: inline-flex; align-items: center;">
+              <input type="radio" name="qh-urgency" value="Urgent" class="text-red-600 focus:ring-red-500">
+              <span>🚨 Urgent / Immediate Intervention</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div style="margin-bottom: 22px;">
+          <label for="qh-input-location" class="block text-xs font-semibold text-slate-300 mb-1.5">Current Campus Location / Room:</label>
+          <input type="text" id="qh-input-location" placeholder="e.g. Quadrangle Benches / Main Library 2nd Flr..."
+            style="padding: 14px 16px; border-radius: 12px; margin-top: 8px; width: 100%;"
+            class="bg-[#070d1a] border border-[#1e293b] text-xs text-[#0F172A] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition">
+        </div>
+
+        <!-- Description -->
+        <div style="margin-bottom: 22px;">
+          <label for="qh-input-desc" class="block text-xs font-semibold text-slate-300 mb-1.5">Brief Description of Situation:</label>
+          <textarea id="qh-input-desc" rows="3" placeholder="Please describe what assistance you need right now..."
+            style="padding: 14px 16px; border-radius: 12px; margin-top: 8px; width: 100%; resize: none; line-height: 1.5;"
+            class="bg-[#070d1a] border border-[#1e293b] text-xs text-[#0F172A] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition"></textarea>
+        </div>
+
+        <!-- Anonymous Toggle (Fixed Breathable Padding) -->
+        <div style="padding: 14px 16px; border-radius: 12px; display: flex; align-items: center; gap: 12px; background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(148, 163, 184, 0.2); margin-bottom: 24px;">
+          <input type="checkbox" id="qh-check-anonymous" class="size-4.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0">
+          <label for="qh-check-anonymous" class="text-xs text-slate-300 cursor-pointer select-none leading-relaxed">
+            <span class="font-bold text-[#0F172A]">Protect My Identity</span> (Anonymous Quick Help submission under RA 10627 Anti-Bullying Act)
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-4 border-t border-[#16233b] flex flex-wrap items-center justify-between gap-3">
+          <span class="text-[11px] text-slate-400">Routes immediately to active OSAS Duty Officer.</span>
+          <button onclick="submitQuickHelpRequest()"
+            style="background: #2563eb; color: #ffffff; padding: 12px 24px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;"
+            class="hover:bg-blue-700 transition shadow-[0_4px_16px_rgba(37,99,235,0.4)]">
+            <span>Transmit Quick Help Request</span>
+            <span>→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 2: TRACK MY REQUESTS -->
+      <div id="pane-qh-track" class="hidden space-y-4" style="display: none;">
+        <div id="qh-tracking-list" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- HCI MODAL: ADMIN SECURITY AUDIT LOG                      -->
+  <!-- ======================================================== -->
+  <div id="modal-audit-log" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto" style="display: none;">
+    <div class="bg-white border border-slate-200/70 rounded-3xl max-w-5xl w-full p-6 sm:p-8 shadow-2xl relative text-[#0F172A] font-sans my-auto max-h-[90vh] flex flex-col">
+      <!-- Close Button -->
+      <button onclick="closeAuditLogModal()"
+        class="absolute top-5 right-5 text-slate-400 hover:text-[#0F172A] p-2 rounded-xl hover:bg-slate-800 transition cursor-pointer">
+        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="flex items-center gap-3 mb-4 shrink-0">
+        <div class="size-10 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center text-lg">🛡️</div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-lg font-bold text-[#0F172A]">SafeTrack Administrator Security Audit Log</h2>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/10 border border-purple-500/30 text-purple-300">Immutable Ledger</span>
+          </div>
+          <p class="text-xs text-slate-400">Cryptographically sequenced activity tracking compliant with Republic Act 10173 and institutional oversight.</p>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#16233b] mb-4 shrink-0">
+        <!-- Filter Pills -->
+        <div class="flex flex-wrap items-center gap-1.5" id="audit-filter-pills">
+          <button onclick="filterAuditLogs('ALL', this)" class="audit-pill active px-3 py-1.5 rounded-xl bg-purple-600 text-[#0F172A] text-xs font-bold transition cursor-pointer">All Events</button>
+          <button onclick="filterAuditLogs('Status Changes', this)" class="audit-pill px-3 py-1.5 rounded-xl bg-[#070d1a] hover:bg-[#111c33] border border-[#16233b] text-slate-400 hover:text-[#0F172A] text-xs font-semibold transition cursor-pointer">Status Changes</button>
+          <button onclick="filterAuditLogs('Access / Views', this)" class="audit-pill px-3 py-1.5 rounded-xl bg-[#070d1a] hover:bg-[#111c33] border border-[#16233b] text-slate-400 hover:text-[#0F172A] text-xs font-semibold transition cursor-pointer">Access / Views</button>
+          <button onclick="filterAuditLogs('Security', this)" class="audit-pill px-3 py-1.5 rounded-xl bg-[#070d1a] hover:bg-[#111c33] border border-[#16233b] text-slate-400 hover:text-[#0F172A] text-xs font-semibold transition cursor-pointer">Security</button>
+          <button onclick="filterAuditLogs('Appointments', this)" class="audit-pill px-3 py-1.5 rounded-xl bg-[#070d1a] hover:bg-[#111c33] border border-[#16233b] text-slate-400 hover:text-[#0F172A] text-xs font-semibold transition cursor-pointer">Appointments</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="audit-search-input" onkeyup="searchAuditLogs(this.value)" placeholder="Search actor, docket, action..."
+            class="w-full bg-[#070d1a] border border-[#1e293b] rounded-xl pl-8 pr-3 py-1.5 text-xs text-[#0F172A] placeholder:text-slate-500 focus:outline-none focus:border-purple-500">
+          <svg class="size-3.5 absolute left-2.5 top-2.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Table Body -->
+      <div class="flex-1 overflow-y-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead class="sticky top-0 bg-slate-50/90 border-b border-slate-200/80 text-[#64748B] uppercase text-[11px] tracking-wider font-semibold">
+            <tr>
+              <th class="py-2.5 px-3">Log ID</th>
+              <th class="py-2.5 px-3">Timestamp</th>
+              <th class="py-2.5 px-3">Actor &amp; Role</th>
+              <th class="py-2.5 px-3">Action Type</th>
+              <th class="py-2.5 px-3">Target Reference</th>
+              <th class="py-2.5 px-3">Session &amp; IP</th>
+              <th class="py-2.5 px-3">Details</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body" class="divide-y divide-[#16233b] text-slate-300">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pt-4 border-t border-[#16233b] flex items-center justify-between text-xs text-slate-400 shrink-0 mt-4">
+        <span id="audit-count-indicator">Showing 0 entries</span>
+        <button onclick="exportAuditLogs()" class="text-xs text-purple-400 hover:text-purple-300 font-semibold cursor-pointer">Export Log Records (CSV)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- HCI MODAL: CONFIRM IDENTITY UNMASKING (PRIVACY WARNING)  -->
+  <!-- ======================================================== -->
+  <div id="modal-confirm-unmask" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto" style="display: none;">
+    <div class="bg-white border border-slate-200/70 rounded-2xl max-w-md w-full p-6 shadow-xl relative text-[#0F172A] font-sans my-auto">
+      <div class="size-12 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center justify-center text-2xl mx-auto mb-4">
+        🔒
+      </div>
+      <h3 class="text-base font-bold text-[#0F172A] text-center mb-2">Confidential Record Disclosure Authorization</h3>
+      <p class="text-xs text-slate-300 text-center leading-relaxed mb-4">
+        Under Republic Act 10627 (Anti-Bullying Act) and CdM Student Privacy Protocols, anonymous student disclosures are strictly confidential.
+      </p>
+      <div class="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs mb-5">
+        <span class="font-bold">Audit Warning:</span> Revealing this student's identity will be permanently inscribed into the immutable Administrator Security Audit Log with your timestamp and credentials.
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="closeConfirmUnmaskModal()"
+          class="flex-1 py-2.5 rounded-xl bg-[#070d1a] hover:bg-[#111c33] border border-[#1e293b] text-slate-300 hover:text-[#0F172A] text-xs font-semibold transition cursor-pointer">
+          Cancel
+        </button>
+        <button onclick="executeConfirmUnmask()"
+          class="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-[#0F172A] text-xs font-bold transition cursor-pointer shadow-[0_4px_16px_rgba(217,119,6,0.35)]">
+          Confirm Unmasking
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=20261116-v63-adjustments"></script>
+</body>
+
+</html>

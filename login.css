@@ -1,0 +1,107 @@
+/**
+ * SafeTrack Unified Authentication Design System
+ * Extracted from gizmo.css + index.html
+ * Colegio de Montalban - Student Discipline & Welfare Portal
+ */
+
+/* ======================================================== */
+/* WCAG AA SEMANTIC HCI COLOR TOKENS                        */
+/* ======================================================== */
+:root, [data-theme="dark"], body[data-theme="dark"] {
+  --bg: #030610;
+  --surface: #0c1425;
+  --surface-raised: #141f36;
+  --surface-hover: #1a2744;
+  --border: #1e293b;
+  --border-muted: #16233b;
+  --text: #E8EEF7;
+  --text-muted: #A9B4C6;
+  --text-subtle: #748297;
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
+  --accent-light: rgba(37, 99, 235, 0.15);
+  --success: #059669;
+  --success-text: #34d399;
+  --warning: #d97706;
+  --warning-text: #fbbf24;
+  --danger: #dc2626;
+  --danger-text: #f87171;
+}
+
+[data-theme="light"], body[data-theme="light"] {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-raised: #f1f5f9;
+  --surface-hover: #e2e8f0;
+  --border: #cbd5e1;
+  --border-muted: #e2e8f0;
+  --text: #0f172a;
+  --text-muted: #475569;
+  --text-subtle: #64748b;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff6ff;
+  --success: #047857;
+  --success-text: #065f46;
+  --warning: #b45309;
+  --warning-text: #92400e;
+  --danger: #b91c1c;
+  --danger-text: #991b1b;
+}
+
+/* ======================================================== */
+/* SPLIT SCREEN & MODERN AUTH HELPERS (FROM GIZMO.CSS)      */
+/* ======================================================== */
+@media (min-width: 48rem) {
+  .md\:grid-cols-\[1\.1fr_0\.9fr\] {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+  .md\:p-16 {
+    padding: 4rem;
+  }
+}
+.bg-blue-600 { background-color: #2563eb; }
+.hover\:bg-blue-500:hover { background-color: #3b82f6; }
+.bg-slate-900\/60 { background-color: rgba(15, 23, 42, 0.6); }
+.border-slate-800 { border-color: #1e293b; }
+.border-slate-700 { border-color: #334155; }
+.from-blue-400 { --tw-gradient-from: #60a5fa; }
+.via-teal-300 { --tw-gradient-via: #5eead4; }
+.to-emerald-400 { --tw-gradient-to: #34d399; }
+.bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
+.bg-clip-text { -webkit-background-clip: text; background-clip: text; }
+.text-transparent { color: transparent; }
+
+/* Admin Demo & Alert Styles */
+.border-blue-500\/30 { border-color: rgba(59, 130, 246, 0.3); }
+.bg-blue-500\/10 { background-color: rgba(59, 130, 246, 0.1); }
+.hover\:bg-blue-500\/20:hover { background-color: rgba(59, 130, 246, 0.2); }
+.text-blue-400 { color: #60a5fa; }
+.text-rose-400 { color: #fb7185; }
+.border-rose-500\/30 { border-color: rgba(244, 63, 94, 0.3); }
+.bg-rose-500\/10 { background-color: rgba(244, 63, 94, 0.1); }
+
+/* ======================================================== */
+/* LOGIN SCREEN PALETTE (FROM GIZMO.CSS)                    */
+/* ======================================================== */
+.bg-\[\#050914\] { background-color: #050914; }
+.border-\[\#101b2f\] { border-color: #101b2f; }
+.bg-\[\#0b1324\] { background-color: #0b1324; }
+.border-\[\#16233b\] { border-color: #16233b; }
+.bg-\[\#091020\] { background-color: #091020; }
+.bg-\[\#03060e\] { background-color: #03060e; }
+.bg-\[\#080d1a\] { background-color: #080d1a; }
+.hover\:bg-\[\#0c1426\]:hover { background-color: #0c1426; }
+.bg-\[\#2563eb\] { background-color: #2563eb; }
+.hover\:bg-blue-600:hover { background-color: #1d4ed8; }
+.bg-\[\#0f172a\] { background-color: #0f172a; }
+.border-\[\#1e293b\] { border-color: #1e293b; }
+.focus\:border-blue-500:focus { border-color: #3b82f6; }
+.text-blue-500 { color: #3b82f6; }
+.max-w-\[380px\] { max-width: 380px; }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lg\:text-\[40px\] { font-size: 40px; line-height: 1.15; }
+.lg\:text-\[42px\] { font-size: 42px; line-height: 1.15; }
+.my-auto { margin-top: auto; margin-bottom: auto; }
+.border-slate-100 { border-color: #f1f5f9; }
+.shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); }

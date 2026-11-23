@@ -1,0 +1,13 @@
+{
+  "name": "safetrack-cdm",
+  "version": "1.0.0",
+  "description": "SafeTrack - Colegio de Montalban Offline-First Disciplinary Incident & Grievance Tracking System",
+  "scripts": {
+    "start": "node server.js",
+    "build:css": "tailwindcss -i src/input.css -o tailwind.min.css --minify",
+    "watch:css": "tailwindcss -i src/input.css -o tailwind.min.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
